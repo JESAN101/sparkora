@@ -1,98 +1,97 @@
 import { Link } from "react-router-dom";
-import { FaHeart, FaShoppingCart, FaStar } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaShoppingBag, FaStar } from "react-icons/fa";
 import { useCart } from "../../context/CartContext";
-
-
+import { useWishlist } from "../../context/WishlistContext";
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
+
+  const inWishlist = wishlist.some((item) => item.id === product.id);
   const discount = Math.round(
     ((product.price - product.discountPrice) / product.price) * 100
   );
 
+  const toggleWishlist = () => {
+    if (inWishlist) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
+  };
+
   return (
-    <div className="group bg-white rounded-3xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden">
+    <div className="group card-luxury overflow-hidden flex flex-col">
+      {/* Image */}
+      <div className="relative overflow-hidden bg-cream">
+        <Link to={`/product/${product.id}`}>
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+        </Link>
 
-      {/* Product Image */}
-      <div className="relative overflow-hidden">
+        {discount > 0 && (
+          <span className="absolute top-4 left-4 bg-burgundy text-ivory px-3 py-1 rounded-full text-xs font-semibold tracking-wide">
+            −{discount}%
+          </span>
+        )}
 
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-72 object-cover group-hover:scale-110 transition duration-500"
-        />
-
-        {/* Discount Badge */}
-        <span className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-          -{discount}%
-        </span>
-
-        {/* Wishlist */}
-        <button className="absolute top-4 right-4 bg-white p-3 rounded-full shadow hover:bg-pink-600 hover:text-white transition">
-          <FaHeart />
+        <button
+          onClick={toggleWishlist}
+          aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-sm hover:bg-rose hover:text-ivory transition-colors"
+        >
+          {inWishlist ? <FaHeart className="text-rose" size={15} /> : <FaRegHeart size={15} />}
         </button>
-
       </div>
 
       {/* Content */}
-      <div className="p-5">
-
-        <p className="text-sm text-gray-500 uppercase">
+      <div className="p-5 flex flex-col flex-1">
+        <p className="text-xs text-taupe uppercase tracking-widest">
           {product.category}
         </p>
 
-        <h3 className="text-xl font-semibold mt-2">
-          {product.name}
-        </h3>
+        <Link to={`/product/${product.id}`}>
+          <h3 className="font-display text-xl font-medium mt-1.5 text-charcoal hover:text-rose-dark transition-colors">
+            {product.name}
+          </h3>
+        </Link>
 
-        {/* Rating */}
-        <div className="flex items-center gap-2 mt-3">
-
-          <FaStar className="text-yellow-400" />
-
-          <span className="font-medium">
-            {product.rating}
-          </span>
-
-          <span className="text-gray-400">
-            ({product.reviews})
-          </span>
-
+        <div className="flex items-center gap-1.5 mt-2 text-sm">
+          <FaStar className="text-gold" size={13} />
+          <span className="font-medium text-charcoal">{product.rating}</span>
+          <span className="text-taupe">({product.reviews})</span>
         </div>
 
-        {/* Price */}
-        <div className="flex items-center gap-3 mt-4">
-
-          <span className="text-2xl font-bold text-pink-600">
+        <div className="flex items-baseline gap-2 mt-3">
+          <span className="text-xl font-semibold text-charcoal">
             Rs. {product.discountPrice.toLocaleString()}
           </span>
-
-          <span className="line-through text-gray-400">
-            Rs. {product.price.toLocaleString()}
-          </span>
-
+          {discount > 0 && (
+            <span className="text-sm text-taupe/70 line-through">
+              Rs. {product.price.toLocaleString()}
+            </span>
+          )}
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-3 mt-6">
-
+        <div className="flex gap-3 mt-5 pt-1">
           <button
-  onClick={() => addToCart(product)}
-  className="flex-1 bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition"
->
-  <FaShoppingCart />
-  Add to Cart
-</button>
+            onClick={() => addToCart(product)}
+            className="btn-luxury flex-1 py-3 rounded-full flex items-center justify-center gap-2 text-sm font-medium"
+          >
+            <FaShoppingBag size={13} />
+            Add to Bag
+          </button>
 
           <Link
             to={`/product/${product.id}`}
-            className="px-5 border rounded-xl flex items-center hover:bg-gray-100 transition"
+            className="btn-luxury-outline px-5 rounded-full flex items-center text-sm font-medium"
           >
             View
           </Link>
-
         </div>
-
       </div>
     </div>
   );

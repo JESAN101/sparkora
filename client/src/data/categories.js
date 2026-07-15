@@ -6,17 +6,17 @@ import ring from "../assets/images/categories/jewel5.jpg";
 const categories = [
   {
     id: 1,
-    name: "Necklace",
+    name: "Necklaces",
     image: necklace1,
   },
   {
     id: 2,
-    name: "Necklace",
+    name: "Earrings",
     image: necklace2,
   },
   {
     id: 3,
-    name: "Necklace",
+    name: "Bracelets",
     image: necklace3,
   },
   {

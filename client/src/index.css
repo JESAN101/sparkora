@@ -1,1 +1,116 @@
 @import "tailwindcss";
+
+/* ============================================
+   SPARKORA DESIGN SYSTEM
+   Fine-jewelry palette: warm ivory, rose gold,
+   antique gold, deep burgundy. Cormorant Garamond
+   for display type (the "engraving" face), Manrope
+   for UI/body (clean, doesn't compete with it).
+   ============================================ */
+@theme {
+  --font-display: "Cormorant Garamond", "Georgia", serif;
+  --font-body: "Manrope", "Segoe UI", sans-serif;
+
+  --color-ivory: #fbf7f2;
+  --color-cream: #f3eae0;
+  --color-blush: #f6e3db;
+  --color-line: #e6d9cd;
+
+  --color-charcoal: #251d20;
+  --color-taupe: #6f6058;
+
+  --color-rose: #b3735a;
+  --color-rose-light: #d9a98c;
+  --color-rose-dark: #8f5a44;
+
+  --color-gold: #b4913f;
+  --color-gold-light: #d9c07f;
+
+  --color-burgundy: #6d1b34;
+  --color-burgundy-light: #8f2c48;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-charcoal);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4,
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Thin gold rule used as a section signature throughout the site */
+.divider-gold {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-gold) 50%,
+    transparent
+  );
+}
+
+/* Primary CTA — brushed gold, used for "Proceed to Checkout", "Place Order" etc */
+.btn-luxury {
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, var(--color-rose) 0%, var(--color-rose-dark) 100%);
+  color: var(--color-ivory);
+  transition: all 0.3s ease;
+}
+.btn-luxury:hover {
+  background: linear-gradient(135deg, var(--color-rose-dark) 0%, var(--color-burgundy) 100%);
+  box-shadow: 0 10px 25px -8px rgba(109, 27, 52, 0.45);
+  transform: translateY(-1px);
+}
+.btn-luxury:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-luxury-outline {
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: transparent;
+  color: var(--color-rose-dark);
+  border: 1.5px solid var(--color-rose);
+  transition: all 0.3s ease;
+}
+.btn-luxury-outline:hover {
+  background: var(--color-rose);
+  color: var(--color-ivory);
+}
+
+/* Jewelry-tray card: soft lift + hairline gold cap, used for cart items,
+   summary panels — evokes a lined presentation box rather than a generic card */
+.card-luxury {
+  background: #ffffff;
+  border: 1px solid var(--color-line);
+  border-radius: 1.25rem;
+  box-shadow: 0 2px 10px -4px rgba(37, 29, 32, 0.06);
+  position: relative;
+}
+.card-luxury::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.5rem;
+  right: 1.5rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold-light), transparent);
+}
+
+::selection {
+  background: var(--color-rose-light);
+  color: var(--color-charcoal);
+}

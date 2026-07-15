@@ -8,6 +8,7 @@ import ProductDetails from "../pages/ProductDetails";
 import Cart from "../pages/Cart";
 import Wishlist from "../pages/Wishlist";
 import Checkout from "../pages/Checkout";
+import OrderSuccess from "../pages/OrderSuccess";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Profile from "../pages/Profile";
@@ -70,6 +71,15 @@ const AppRoutes = () => {
           element={
             <MainLayout>
               <Checkout />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/order-success"
+          element={
+            <MainLayout>
+              <OrderSuccess />
             </MainLayout>
           }
         />

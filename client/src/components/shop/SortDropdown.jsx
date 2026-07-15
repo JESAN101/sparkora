@@ -1,31 +1,20 @@
-const SortDropdown = ({
-  sort,
-  setSort,
-}) => {
+const SortDropdown = ({ sort, setSort }) => {
   return (
-    <div className="bg-white rounded-xl shadow p-6">
-
-      <h2 className="font-bold text-xl mb-5">
+    <div className="card-luxury p-6">
+      <h2 className="font-display text-lg font-medium text-charcoal mb-4">
         Sort By
       </h2>
 
       <select
         value={sort}
-        onChange={(e) =>
-          setSort(e.target.value)
-        }
-        className="w-full border rounded-lg p-3"
+        onChange={(e) => setSort(e.target.value)}
+        className="w-full border border-line rounded-lg p-3 text-sm bg-white focus:outline-none focus:border-rose transition-colors"
       >
         <option>Latest</option>
-
         <option>Price: Low to High</option>
-
         <option>Price: High to Low</option>
-
         <option>Highest Rated</option>
-
       </select>
-
     </div>
   );
 };

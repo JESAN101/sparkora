@@ -1,42 +1,27 @@
-const categories = [
-  "All",
-  "Rings",
-  "Necklaces",
-  "Earrings",
-  "Bracelets",
-];
+const categories = ["All", "Rings", "Necklaces", "Earrings", "Bracelets"];
 
-const CategoryFilter = ({
-  category,
-  setCategory,
-}) => {
+const CategoryFilter = ({ category, setCategory }) => {
   return (
-    <div className="bg-white rounded-xl shadow p-6 mb-8">
-
-      <h2 className="font-bold mb-5 text-xl">
+    <div className="card-luxury p-6 mb-6">
+      <h2 className="font-display text-lg font-medium text-charcoal mb-4">
         Categories
       </h2>
 
-      <div className="space-y-3">
-
+      <div className="space-y-1">
         {categories.map((item) => (
-
           <button
             key={item}
             onClick={() => setCategory(item)}
-            className={`block w-full text-left transition ${
+            className={`block w-full text-left text-sm py-2 px-1 transition-colors ${
               category === item
-                ? "text-pink-600 font-semibold"
-                : "hover:text-pink-600"
+                ? "text-rose-dark font-semibold"
+                : "text-taupe hover:text-rose-dark"
             }`}
           >
             {item}
           </button>
-
         ))}
-
       </div>
-
     </div>
   );
 };

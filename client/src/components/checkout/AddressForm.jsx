@@ -1,45 +1,73 @@
-const AddressForm = () => {
-  return (
-    <div className="bg-white rounded-2xl shadow p-8">
+const Field = ({ children }) => <div>{children}</div>;
 
-      <h2 className="text-2xl font-bold mb-6">
+const inputClass =
+  "w-full border border-line rounded-xl p-3.5 text-sm bg-ivory focus:outline-none focus:border-rose transition-colors";
+
+const AddressForm = ({ register, errors }) => {
+  return (
+    <div className="card-luxury p-7 sm:p-8">
+      <h2 className="font-display text-2xl font-medium text-charcoal mb-6">
         Shipping Address
       </h2>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-5">
+        <Field>
+          <input
+            type="text"
+            placeholder="Province"
+            {...register("province", { required: "Province is required" })}
+            className={inputClass}
+          />
+          {errors.province && (
+            <p className="text-xs text-burgundy mt-1.5">{errors.province.message}</p>
+          )}
+        </Field>
 
-        <input
-          type="text"
-          placeholder="Province"
-          className="border rounded-xl p-4"
-        />
+        <Field>
+          <input
+            type="text"
+            placeholder="District"
+            {...register("district", { required: "District is required" })}
+            className={inputClass}
+          />
+          {errors.district && (
+            <p className="text-xs text-burgundy mt-1.5">{errors.district.message}</p>
+          )}
+        </Field>
 
-        <input
-          type="text"
-          placeholder="District"
-          className="border rounded-xl p-4"
-        />
+        <Field>
+          <input
+            type="text"
+            placeholder="City"
+            {...register("city", { required: "City is required" })}
+            className={inputClass}
+          />
+          {errors.city && (
+            <p className="text-xs text-burgundy mt-1.5">{errors.city.message}</p>
+          )}
+        </Field>
 
-        <input
-          type="text"
-          placeholder="City"
-          className="border rounded-xl p-4"
-        />
-
-        <input
-          type="text"
-          placeholder="Postal Code"
-          className="border rounded-xl p-4"
-        />
-
+        <Field>
+          <input
+            type="text"
+            placeholder="Postal Code"
+            {...register("postalCode")}
+            className={inputClass}
+          />
+        </Field>
       </div>
 
-      <textarea
-        rows="4"
-        placeholder="Street Address"
-        className="border rounded-xl p-4 mt-6 w-full"
-      />
-
+      <div className="mt-5">
+        <textarea
+          rows="3"
+          placeholder="Street Address"
+          {...register("street", { required: "Street address is required" })}
+          className={`${inputClass} w-full`}
+        />
+        {errors.street && (
+          <p className="text-xs text-burgundy mt-1.5">{errors.street.message}</p>
+        )}
+      </div>
     </div>
   );
 };
