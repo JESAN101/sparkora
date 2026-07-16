@@ -15,14 +15,18 @@ export const createProduct = async (req, res) => {
       });
     }
 
-    const {
-      name,
-      description,
-      price,
-      category,
-      brand,
-      stock,
-    } = req.body;
+   const {
+  name,
+  description,
+  price,
+  category,
+  brand,
+  stock,
+  discountPrice,
+  featured,
+  newArrival,
+  bestseller,
+} = req.body;
 
     if (!name || !description || !price || !category) {
       return res.status(400).json({
@@ -36,15 +40,19 @@ export const createProduct = async (req, res) => {
       : [];
 
     const product = await Product.create({
-      name,
-      description,
-      price,
-      category,
-      brand,
-      stock,
-      images,
-      seller: req.user._id,
-    });
+  name,
+  description,
+  price,
+  category,
+  brand,
+  stock,
+  discountPrice: discountPrice || price,
+  featured: featured === "true" || featured === true,
+  newArrival: newArrival === "true" || newArrival === true,
+  bestseller: bestseller === "true" || bestseller === true,
+  images,
+  seller: req.user._id,
+});
 
     res.status(201).json({
       success: true,

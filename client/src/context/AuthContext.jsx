@@ -1,42 +1,55 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { login as loginApi, register as registerApi, getProfile } from "../services/authService";
 
 const AuthContext = createContext();
 
-// Frontend-only mock auth so Login / Register / Profile work end-to-end
-// before the backend exists. Swap login()/register() for real API calls
-// (and store the JWT instead of a plain user object) once /api/auth is live.
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("sparkora-user");
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const persist = (userData) => {
-    localStorage.setItem("sparkora-user", JSON.stringify(userData));
-    setUser(userData);
+  // On app load, if a token exists, verify it and load the profile
+  useEffect(() => {
+    const loadUser = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const data = await getProfile();
+        setUser(data.user);
+      } catch (err) {
+        localStorage.removeItem("token");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadUser();
+  }, []);
+
+  const login = async ({ email, password }) => {
+    const data = await loginApi({ email, password });
+    localStorage.setItem("token", data.token);
+    setUser(data.user);
+    toast.success(`Welcome back, ${data.user.fullName}`);
   };
 
-  const login = ({ email }) => {
-    const userData = { name: email.split("@")[0], email };
-    persist(userData);
-    toast.success(`Welcome back, ${userData.name}`);
-  };
-
-  const register = ({ name, email }) => {
-    const userData = { name, email };
-    persist(userData);
+  const register = async ({ name, email, password, phone }) => {
+    await registerApi({ fullName: name, email, password, phone });
+    // auto-login right after registering
+    await login({ email, password });
     toast.success(`Welcome to Sparkora, ${name.split(" ")[0]}`);
   };
 
   const logout = () => {
-    localStorage.removeItem("sparkora-user");
+    localStorage.removeItem("token");
     setUser(null);
     toast.success("Logged out");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

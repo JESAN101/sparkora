@@ -12,9 +12,12 @@ const Login = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    login(data);
+  try {
+    await login(data);
     navigate("/profile");
-  };
+  } catch (err) {
+  }
+};
 
   return (
     <section className="min-h-screen bg-ivory flex items-center justify-center px-6 py-16">

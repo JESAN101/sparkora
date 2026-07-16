@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import products from "../data/products";
+import { getProducts } from "../services/productService";
+import { normalizeProduct } from "../utils/normalizeProduct";
 
 import SearchBar from "../components/shop/SearchBar";
 import CategoryFilter from "../components/shop/CategoryFilter";
@@ -12,9 +13,28 @@ const Shop = () => {
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get("category") || "All";
 
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState(initialCategory);
   const [sort, setSort] = useState("Latest");
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await getProducts();
+        setProducts(data.products.map(normalizeProduct));
+      } catch (err) {
+        setError("Failed to load products. Is the backend running?");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const filteredProducts = useMemo(() => {
     let filtered = [...products];
@@ -44,7 +64,7 @@ const Shop = () => {
     }
 
     return filtered;
-  }, [search, category, sort]);
+  }, [products, search, category, sort]);
 
   return (
     <section className="py-14 sm:py-20 bg-ivory min-h-screen">
@@ -53,9 +73,7 @@ const Shop = () => {
           <h1 className="font-display text-4xl sm:text-5xl font-medium text-charcoal">
             Shop Jewelry
           </h1>
-          <p className="text-taupe mt-3">
-            Explore our luxury collection.
-          </p>
+          <p className="text-taupe mt-3">Explore our luxury collection.</p>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8 lg:gap-10">
@@ -66,10 +84,17 @@ const Shop = () => {
           </div>
 
           <div className="lg:col-span-3">
-            <p className="text-sm text-taupe mb-6">
-              {filteredProducts.length} {filteredProducts.length === 1 ? "piece" : "pieces"}
-            </p>
-            <ProductGrid products={filteredProducts} />
+            {loading && <p className="text-taupe">Loading products...</p>}
+            {error && <p className="text-burgundy">{error}</p>}
+            {!loading && !error && (
+              <>
+                <p className="text-sm text-taupe mb-6">
+                  {filteredProducts.length}{" "}
+                  {filteredProducts.length === 1 ? "piece" : "pieces"}
+                </p>
+                <ProductGrid products={filteredProducts} />
+              </>
+            )}
           </div>
         </div>
       </div>

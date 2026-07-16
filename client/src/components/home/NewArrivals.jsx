@@ -1,14 +1,34 @@
+import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 
-import products from "../../data/products";
+import { getProducts } from "../../services/productService";
+import { normalizeProduct } from "../../utils/normalizeProduct";
 import ProductCard from "../product/ProductCard";
 
 const NewArrivals = () => {
-  const newArrivals = products.filter((product) => product.newArrival);
+  const [newArrivals, setNewArrivals] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchNewArrivals = async () => {
+      try {
+        setLoading(true);
+        const data = await getProducts();
+        const normalized = data.products.map(normalizeProduct);
+        setNewArrivals(normalized.filter((product) => product.newArrival));
+      } catch (err) {
+        setNewArrivals([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNewArrivals();
+  }, []);
+
+  if (loading) return null;
   if (newArrivals.length === 0) return null;
 
   return (

@@ -1,9 +1,43 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import products from "../../data/products";
+import { getProducts } from "../../services/productService";
+import { normalizeProduct } from "../../utils/normalizeProduct";
 import ProductCard from "../product/ProductCard";
 
 const FeaturedProducts = () => {
-  const featuredProducts = products.filter((product) => product.featured);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        setLoading(true);
+        const data = await getProducts();
+        const normalized = data.products.map(normalizeProduct);
+        setFeaturedProducts(normalized.filter((product) => product.featured));
+      } catch (err) {
+        setError("Failed to load featured products.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-20 sm:py-24 bg-cream/40">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 text-center">
+          <p className="text-taupe">Loading featured pieces...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || featuredProducts.length === 0) {
+    return null; // fail quietly on the homepage rather than showing an empty/broken section
+  }
 
   return (
     <section className="py-20 sm:py-24 bg-cream/40">

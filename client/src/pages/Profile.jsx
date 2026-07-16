@@ -20,7 +20,7 @@ const Profile = () => {
           <div className="flex items-center gap-4">
             <FaUserCircle className="text-rose" size={52} />
             <div>
-              <p className="font-display text-xl font-medium text-charcoal">{user.name}</p>
+              <p className="font-display text-xl font-medium text-charcoal">{user.fullname}</p>
               <p className="text-sm text-taupe">{user.email}</p>
             </div>
           </div>

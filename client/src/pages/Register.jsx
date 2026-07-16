@@ -13,9 +13,12 @@ const Register = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    registerUser(data);
+  try {
+    await registerUser(data);
     navigate("/profile");
-  };
+  } catch (err) {
+  }
+};
 
   return (
     <section className="min-h-screen bg-ivory flex items-center justify-center px-6 py-16">

@@ -1,17 +1,37 @@
-import products from "../../data/products";
+import { useEffect, useState } from "react";
+import { getProducts } from "../../services/productService";
+import { normalizeProduct } from "../../utils/normalizeProduct";
 import ProductCard from "./ProductCard";
 
 const RelatedProducts = ({
   currentProduct,
 }) => {
+  const [related, setRelated] = useState([]);
 
-  const related = products
-    .filter(
-      (item) =>
-        item.category === currentProduct.category &&
-        item.id !== currentProduct.id
-    )
-    .slice(0, 4);
+  useEffect(() => {
+    const fetchRelated = async () => {
+      try {
+        const data = await getProducts();
+        const all = (data.products || data).map(normalizeProduct);
+
+        const filtered = all
+          .filter(
+            (item) =>
+              item.category === currentProduct.category &&
+              item.id !== currentProduct.id
+          )
+          .slice(0, 4);
+
+        setRelated(filtered);
+      } catch (err) {
+        console.error("Failed to load related products:", err);
+      }
+    };
+
+    if (currentProduct?.category) {
+      fetchRelated();
+    }
+  }, [currentProduct]);
 
   return (
 

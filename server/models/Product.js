@@ -33,6 +33,31 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
 
+    discountPrice: {
+      type: Number,
+      default: function () { return this.price; }, // no discount by default
+    },
+    rating: {
+      type: Number,
+      default: 4.8,
+    },
+    reviews: {
+      type: Number,
+      default: 0,
+    },
+    featured: {
+      type: Boolean,
+      default: false,
+    },
+    newArrival: {
+      type: Boolean,
+      default: false,
+    },
+    bestseller: {
+      type: Boolean,
+      default: false,
+    },
+
     images: [
   {
     type: String,
