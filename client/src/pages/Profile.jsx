@@ -37,16 +37,16 @@ const Profile = () => {
         <div className="card-luxury p-8 text-center">
           <FaBoxOpen className="text-taupe/40 mx-auto mb-4" size={36} />
           <h3 className="font-display text-xl font-medium text-charcoal mb-2">
-            No orders yet
+            Order History
           </h3>
           <p className="text-taupe text-sm mb-7">
-            Your order history will appear here once you place your first order.
+            View everything you've ordered and track delivery status.
           </p>
           <Link
-            to="/shop"
+            to="/orders"
             className="btn-luxury inline-block px-8 py-3.5 rounded-full text-sm uppercase tracking-widest"
           >
-            Start Shopping
+            View My Orders
           </Link>
         </div>
       </div>

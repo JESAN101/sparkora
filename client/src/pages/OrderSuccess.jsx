@@ -11,6 +11,7 @@ const OrderSuccess = () => {
   }
 
   const { orderId, customerName, total, itemCount } = state;
+  const shortOrderId = orderId ? orderId.toString().slice(-8).toUpperCase() : "";
 
   return (
     <section className="min-h-[75vh] flex items-center justify-center px-6 py-16">
@@ -38,7 +39,7 @@ const OrderSuccess = () => {
         <div className="card-luxury p-6 text-left mb-10">
           <div className="flex justify-between py-2 border-b border-line">
             <span className="text-taupe text-sm">Order ID</span>
-            <span className="font-semibold text-charcoal text-sm">{orderId}</span>
+            <span className="font-semibold text-charcoal text-sm">#{shortOrderId}</span>
           </div>
           <div className="flex justify-between py-2 border-b border-line">
             <span className="text-taupe text-sm">Items</span>
@@ -52,12 +53,20 @@ const OrderSuccess = () => {
           </div>
         </div>
 
-        <Link
-          to="/shop"
-          className="btn-luxury inline-block px-10 py-4 rounded-full text-sm uppercase tracking-widest"
-        >
-          Continue Shopping
-        </Link>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link
+            to={`/orders/${orderId}`}
+            className="btn-luxury-outline inline-block px-10 py-4 rounded-full text-sm uppercase tracking-widest"
+          >
+            View Order
+          </Link>
+          <Link
+            to="/shop"
+            className="btn-luxury inline-block px-10 py-4 rounded-full text-sm uppercase tracking-widest"
+          >
+            Continue Shopping
+          </Link>
+        </div>
       </motion.div>
     </section>
   );

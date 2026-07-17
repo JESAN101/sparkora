@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 import { useCart } from "../context/CartContext";
+import { placeOrder } from "../services/orderService";
 import CustomerForm from "../components/checkout/CustomerForm";
 import AddressForm from "../components/checkout/AddressForm";
 import PaymentMethod from "../components/checkout/PaymentMethod";
@@ -29,26 +31,43 @@ const Checkout = () => {
   const delivery = subtotal === 0 ? 0 : subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : DELIVERY_FEE;
   const total = subtotal + delivery;
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     setSubmitting(true);
 
-    // No backend yet — simulate order placement so the flow is complete
-    // end-to-end. Swap this for a real POST /api/orders call later.
-    setTimeout(() => {
-      const orderId = `SPK${Date.now().toString().slice(-8)}`;
+    try {
+      const payload = {
+        customer: {
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone,
+        },
+        shippingAddress: {
+          province: data.province,
+          district: data.district,
+          city: data.city,
+          postalCode: data.postalCode || "",
+          street: data.street,
+        },
+        paymentMethod: data.paymentMethod || "cod",
+      };
+
+      const { order } = await placeOrder(payload);
 
       navigate("/order-success", {
         state: {
-          orderId,
+          orderId: order._id,
           customerName: data.fullName,
-          total,
-          itemCount: cartItems.length,
+          total: order.totalAmount,
+          itemCount: order.items.length,
         },
       });
 
-      clearCart();
+      await clearCart();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Could not place order. Please try again.");
+    } finally {
       setSubmitting(false);
-    }, 800);
+    }
   };
 
   if (cartItems.length === 0) {

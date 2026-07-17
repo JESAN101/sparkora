@@ -10,6 +10,7 @@ import {
   FaChevronDown,
   FaSignOutAlt,
   FaBoxOpen,
+  FaStore,
 } from "react-icons/fa";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
@@ -182,6 +183,13 @@ const Navbar = () => {
                       >
                         <FaBoxOpen size={13} /> My Orders
                       </Link>
+                      <Link
+                        to="/seller"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
+                      >
+                        <FaStore size={13} /> Seller Dashboard
+                      </Link>
                       <div className="my-1 border-t border-line" />
                       <button
                         onClick={handleLogout}
@@ -270,6 +278,9 @@ const Navbar = () => {
                 </Link>
                 <Link to="/orders" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
                   My Orders
+                </Link>
+                <Link to="/seller" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
+                  Seller Dashboard
                 </Link>
                 <button
                   onClick={() => {

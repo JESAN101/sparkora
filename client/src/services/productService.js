@@ -34,3 +34,13 @@ export const deleteProduct = async (id) => {
   const res = await API.delete(`/products/${id}`);
   return res.data;
 };
+
+export const getMyProducts = async () => {
+  const res = await API.get("/products/seller/my-products");
+  return res.data;
+};
+
+export const updateStock = async (id, stock) => {
+  const res = await API.patch(`/products/${id}/stock`, { stock });
+  return res.data;
+};
