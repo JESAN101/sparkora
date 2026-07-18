@@ -180,6 +180,13 @@ export const toggleUserBlock = async (req, res) => {
   try {
     const { isBlocked } = req.body;
 
+    if (req.params.id === req.user._id.toString() && isBlocked) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot block your own account",
+      });
+    }
+
     const user = await User.findById(req.params.id);
 
     if (!user) {

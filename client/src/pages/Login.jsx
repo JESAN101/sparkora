@@ -1,23 +1,33 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm();
 
+  useEffect(() => {
+    if (searchParams.get("sessionExpired")) {
+      toast.error("Your session has expired. Please log in again.");
+    }
+  }, [searchParams]);
+
   const onSubmit = async (data) => {
-  try {
-    await login(data);
-    navigate("/profile");
-  } catch (err) {
-  }
-};
+    try {
+      await login(data);
+      navigate("/profile");
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Could not log in. Please try again.");
+    }
+  };
 
   return (
     <section className="min-h-screen bg-ivory flex items-center justify-center px-6 py-16">

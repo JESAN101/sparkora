@@ -34,7 +34,7 @@ const rollUpOrderStatus = (order) => {
 // ==========================
 export const placeOrder = async (req, res) => {
   try {
-    const { customer, shippingAddress, paymentMethod } = req.body;
+    const { customer, shippingAddress} = req.body;
 
     if (!customer?.fullName || !customer?.email || !customer?.phone) {
       return res.status(400).json({
@@ -54,6 +54,7 @@ export const placeOrder = async (req, res) => {
         message: "Complete shipping address is required",
       });
     }
+    
 
     const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
 
@@ -111,7 +112,6 @@ export const placeOrder = async (req, res) => {
         postalCode: shippingAddress.postalCode || "",
         street: shippingAddress.street,
       },
-      paymentMethod: paymentMethod || "cod",
       subtotal,
       deliveryFee,
       totalAmount,
@@ -212,7 +212,6 @@ export const getSellerOrders = async (req, res) => {
         buyer: order.user,
         customer: order.customer,
         shippingAddress: order.shippingAddress,
-        paymentMethod: order.paymentMethod,
         isPaid: order.isPaid,
         createdAt: order.createdAt,
         items: myItems,

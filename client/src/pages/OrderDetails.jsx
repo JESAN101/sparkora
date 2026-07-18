@@ -151,7 +151,7 @@ const OrderDetails = () => {
               </span>
             </div>
             <p className="text-xs text-taupe pt-1 uppercase tracking-wide">
-              Payment: {order.paymentMethod === "cod" ? "Cash on Delivery" : order.paymentMethod}
+              Payment: Cash on Delivery
             </p>
           </div>
         </div>

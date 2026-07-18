@@ -71,12 +71,6 @@ const orderSchema = new mongoose.Schema(
       street: { type: String, required: true },
     },
 
-    paymentMethod: {
-      type: String,
-      enum: ["cod", "esewa", "khalti"],
-      default: "cod",
-    },
-
     isPaid: {
       type: Boolean,
       default: false,

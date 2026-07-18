@@ -7,7 +7,6 @@ import { useCart } from "../context/CartContext";
 import { placeOrder } from "../services/orderService";
 import CustomerForm from "../components/checkout/CustomerForm";
 import AddressForm from "../components/checkout/AddressForm";
-import PaymentMethod from "../components/checkout/PaymentMethod";
 import OrderSummary from "../components/checkout/OrderSummary";
 
 const FREE_SHIPPING_THRESHOLD = 50000;
@@ -48,7 +47,6 @@ const Checkout = () => {
           postalCode: data.postalCode || "",
           street: data.street,
         },
-        paymentMethod: data.paymentMethod || "cod",
       };
 
       const { order } = await placeOrder(payload);
@@ -103,7 +101,15 @@ const Checkout = () => {
             <div className="lg:col-span-2 space-y-6">
               <CustomerForm register={register} errors={errors} />
               <AddressForm register={register} errors={errors} />
-              <PaymentMethod register={register} />
+
+              <div className="card-luxury p-7 sm:p-8">
+                <h2 className="font-display text-2xl font-medium text-charcoal mb-2">
+                  Payment
+                </h2>
+                <p className="text-taupe text-sm">
+                  Cash on Delivery — pay in cash when your order arrives.
+                </p>
+              </div>
             </div>
 
             <OrderSummary

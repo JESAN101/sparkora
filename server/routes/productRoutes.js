@@ -8,6 +8,13 @@ import {
   getMyProducts,
   updateStock,
 } from "../controllers/productController.js";
+import {
+  getProductReviews,
+  getReviewEligibility,
+  createReview,
+  updateReview,
+  deleteReview,
+} from "../controllers/reviewController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
@@ -45,5 +52,15 @@ router.delete(
   protect,
   deleteProduct
 );
+
+/* ===========================
+   Reviews (nested under a product)
+=========================== */
+
+router.get("/:id/reviews", getProductReviews);
+router.get("/:id/reviews/eligibility", protect, getReviewEligibility);
+router.post("/:id/reviews", protect, createReview);
+router.put("/:id/reviews/:reviewId", protect, updateReview);
+router.delete("/:id/reviews/:reviewId", protect, deleteReview);
 
 export default router;

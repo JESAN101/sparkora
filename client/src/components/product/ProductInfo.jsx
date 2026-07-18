@@ -66,15 +66,23 @@ const ProductInfo = ({ product }) => {
 
         <div className="flex items-center gap-3 mt-4">
 
-          <FaStar className="text-yellow-400" />
+          {product.reviews > 0 ? (
+            <>
+              <FaStar className="text-yellow-400" />
 
-          <span className="font-semibold">
-            {product.rating}
-          </span>
+              <span className="font-semibold">
+                {product.rating}
+              </span>
 
-          <span className="text-gray-500">
-            ({product.reviews} Reviews)
-          </span>
+              <span className="text-gray-500">
+                ({product.reviews} Reviews)
+              </span>
+            </>
+          ) : (
+            <span className="text-gray-500 text-sm uppercase tracking-wide">
+              No reviews yet
+            </span>
+          )}
 
         </div>
 

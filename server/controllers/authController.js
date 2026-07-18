@@ -15,6 +15,13 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters",
+      });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({
       email: email.toLowerCase(),
@@ -59,6 +66,7 @@ export const registerUser = async (req, res) => {
 };
 
 // ================= LOGIN =================
+// ================= LOGIN =================
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -76,10 +84,19 @@ export const loginUser = async (req, res) => {
       email: email.toLowerCase(),
     });
 
+    // Check if user exists
     if (!user) {
       return res.status(400).json({
         success: false,
         message: "Invalid email or password",
+      });
+    }
+
+    // Check if user is blocked
+    if (user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account has been blocked. Please contact support.",
       });
     }
 

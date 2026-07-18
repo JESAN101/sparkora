@@ -59,10 +59,16 @@ const ProductCard = ({ product }) => {
           </h3>
         </Link>
 
-        <div className="flex items-center gap-1.5 mt-2 text-sm">
-          <FaStar className="text-gold" size={13} />
-          <span className="font-medium text-charcoal">{product.rating}</span>
-          <span className="text-taupe">({product.reviews})</span>
+       <div className="flex items-center gap-1.5 mt-2 text-sm">
+          {product.reviews > 0 ? (
+            <>
+              <FaStar className="text-gold" size={13} />
+              <span className="font-medium text-charcoal">{product.rating}</span>
+              <span className="text-taupe">({product.reviews})</span>
+            </>
+          ) : (
+            <span className="text-taupe text-xs uppercase tracking-wide">No reviews yet</span>
+          )}
         </div>
 
         <div className="flex items-baseline gap-2 mt-3">
