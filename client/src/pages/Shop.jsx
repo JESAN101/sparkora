@@ -21,6 +21,12 @@ const Shop = () => {
   const [category, setCategory] = useState(initialCategory);
   const [sort, setSort] = useState("Latest");
 
+   useEffect(() => {
+    setSearch(searchParams.get("search") || "");
+    setCategory(searchParams.get("category") || "All");
+    setSort(searchParams.get("sort") || "Latest");
+  }, [searchParams]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {

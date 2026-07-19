@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   FaShoppingBag,
   FaRegHeart,
@@ -15,6 +16,15 @@ import {
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useAuth } from "../../context/AuthContext";
+import BrandMark from "./BrandMark";
+
+const searchSuggestions = [
+  { label: "New Arrivals", to: "/shop?category=new-arrivals" },
+  { label: "Rings", to: "/shop?category=Rings" },
+  { label: "Necklaces", to: "/shop?category=Necklaces" },
+  { label: "Earrings", to: "/shop?category=Earrings" },
+  { label: "Bracelets", to: "/shop?category=Bracelets" },
+];
 
 const Navbar = () => {
   const { cartItems } = useCart();
@@ -30,15 +40,16 @@ const Navbar = () => {
 
   const userMenuRef = useRef(null);
   const searchInputRef = useRef(null);
+  const navRef = useRef(null);
 
-  const cartCount = cartItems.reduce((sum, item) => sum + (item.qty || 1), 0);
+  const cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
   const wishlistCount = wishlist.length;
 
   const navLink =
     "relative text-[15px] tracking-wide text-charcoal/80 hover:text-rose-dark transition-colors after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[1.5px] after:w-0 after:bg-rose after:transition-all hover:after:w-full";
 
   const mobileNavLink =
-    "block py-3 text-[16px] tracking-wide text-charcoal/80 hover:text-rose-dark transition-colors border-b border-line/60";
+    "flex items-center gap-3 py-3 text-[16px] tracking-wide text-charcoal/80 hover:text-rose-dark transition-colors border-b border-line/60";
 
   // Sticky-on-scroll: toggle a compact/shadowed state once the user scrolls
   useEffect(() => {
@@ -59,7 +70,19 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Search shortcut: Cmd/Ctrl+K opens search, Esc closes it
+  // Close search panel on outside click (anywhere outside the <nav>)
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchOpen && navRef.current && !navRef.current.contains(e.target)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [searchOpen]);
+
+  // Search shortcut: Cmd/Ctrl+K or "/" opens search, Esc closes it — lets
+  // people jump to search from anywhere on the page without the mouse
   useEffect(() => {
     const handleKeyDown = (e) => {
       const isTypingField =
@@ -79,7 +102,7 @@ const Navbar = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Autofocus the search input once it opens
+  // Autofocus the search input once the panel opens
   useEffect(() => {
     if (searchOpen && searchInputRef.current) {
       searchInputRef.current.focus();
@@ -109,9 +132,19 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const mobileMenuVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
+  };
+  const mobileItemVariants = {
+    hidden: { opacity: 0, x: 16 },
+    visible: { opacity: 1, x: 0 },
+  };
+
   return (
     <>
       <nav
+        ref={navRef}
         className={`sticky top-0 z-50 bg-ivory/95 backdrop-blur border-b border-line transition-shadow duration-300 ${
           scrolled ? "shadow-md" : ""
         }`}
@@ -123,82 +156,103 @@ const Navbar = () => {
         >
           <Link
             to="/"
-            className={`font-display font-semibold tracking-wide text-charcoal transition-all duration-300 ${
+            className={`flex items-center gap-2 font-display font-semibold tracking-wide text-charcoal transition-all duration-300 ${
               scrolled ? "text-2xl" : "text-3xl"
             }`}
           >
+            <BrandMark size={scrolled ? 20 : 24} className="text-gold shrink-0" />
             Sparkora
           </Link>
 
           <div className="hidden md:flex items-center gap-9">
             <Link to="/" className={navLink}>Home</Link>
             <Link to="/shop" className={navLink}>Shop</Link>
-            <Link to="/shop?category=new-arrivals" className={navLink}>New Arrivals</Link>
+            <Link to="/shop?sort=Latest" className={navLink}>New Arrivals</Link>
           </div>
 
           <div className="flex items-center gap-5 text-charcoal">
             {/* Search trigger */}
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="hidden sm:flex items-center gap-2 text-charcoal/70 hover:text-rose-dark transition-colors"
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.94 }}
+              onClick={() => setSearchOpen((o) => !o)}
+              className={`hidden sm:flex items-center gap-2 transition-colors ${
+                searchOpen ? "text-rose-dark" : "text-charcoal/70 hover:text-rose-dark"
+              }`}
               aria-label="Search"
+              aria-expanded={searchOpen}
             >
-              <FaSearch size={17} />
-              <span className="hidden lg:flex items-center gap-1 text-xs text-charcoal/40 border border-line rounded px-1.5 py-0.5">
+              <FaSearch size={18} />
+              <span
+                title="Press Cmd/Ctrl + K to search from anywhere"
+                className="hidden lg:flex items-center gap-1 text-xs text-charcoal/40 border border-line rounded px-1.5 py-0.5"
+              >
                 <span>⌘</span>K
               </span>
-            </button>
+            </motion.button>
 
             {/* User dropdown */}
             <div className="relative hidden sm:block" ref={userMenuRef}>
               {user ? (
                 <>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => setUserMenuOpen((o) => !o)}
                     className="flex items-center gap-2 hover:text-rose-dark transition-colors"
                     aria-label="Account menu"
                     aria-expanded={userMenuOpen}
                   >
                     <FaRegUser size={19} />
-                    <span className="text-sm font-medium hidden lg:block">{user.name}</span>
+                    <span className="text-sm font-medium hidden lg:block">
+                      Hi, {user.fullName?.split(" ")[0]}
+                    </span>
                     <FaChevronDown
                       size={11}
                       className={`transition-transform ${userMenuOpen ? "rotate-180" : ""}`}
                     />
-                  </button>
+                  </motion.button>
 
-                  {userMenuOpen && (
-                    <div className="absolute right-0 mt-3 w-48 bg-ivory border border-line rounded-lg shadow-lg py-2 animate-in fade-in slide-in-from-top-1">
-                      <Link
-                        to="/profile"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 mt-3 w-48 bg-ivory border border-line rounded-lg shadow-lg py-2"
                       >
-                        <FaRegUser size={13} /> My Profile
-                      </Link>
-                      <Link
-                        to="/orders"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
-                      >
-                        <FaBoxOpen size={13} /> My Orders
-                      </Link>
-                      <Link
-                        to="/seller"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
-                      >
-                        <FaStore size={13} /> Seller Dashboard
-                      </Link>
-                      <div className="my-1 border-t border-line" />
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
-                      >
-                        <FaSignOutAlt size={13} /> Logout
-                      </button>
-                    </div>
-                  )}
+                        <Link
+                          to="/profile"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
+                        >
+                          <FaRegUser size={13} /> My Profile
+                        </Link>
+                        <Link
+                          to="/orders"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
+                        >
+                          <FaBoxOpen size={13} /> My Orders
+                        </Link>
+                        <Link
+                          to="/seller"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
+                        >
+                          <FaStore size={13} /> Be a Seller
+                        </Link>
+                        <div className="my-1 border-t border-line" />
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
+                        >
+                          <FaSignOutAlt size={13} /> Logout
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </>
               ) : (
                 <Link
@@ -213,22 +267,44 @@ const Navbar = () => {
 
             {/* Wishlist */}
             <Link to="/wishlist" className="relative hover:text-rose-dark transition-colors" aria-label="Wishlist">
-              <FaRegHeart size={20} />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-burgundy text-ivory text-[10px] font-semibold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center">
-                  {wishlistCount > 99 ? "99+" : wishlistCount}
-                </span>
-              )}
+              <motion.span whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.94 }} className="block">
+                <FaRegHeart size={24} />
+              </motion.span>
+              <AnimatePresence>
+                {wishlistCount > 0 && (
+                  <motion.span
+                    key={wishlistCount}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                    className="absolute -top-2 -right-2 bg-burgundy text-ivory text-[11px] font-semibold min-w-[19px] h-[19px] px-1 rounded-full flex items-center justify-center"
+                  >
+                    {wishlistCount > 99 ? "99+" : wishlistCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Link>
 
             {/* Cart */}
             <Link to="/cart" className="relative hover:text-rose-dark transition-colors" aria-label="Cart">
-              <FaShoppingBag size={20} />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-rose text-ivory text-[10px] font-semibold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center">
-                  {cartCount > 99 ? "99+" : cartCount}
-                </span>
-              )}
+              <motion.span whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.94 }} className="block">
+                <FaShoppingBag size={24} />
+              </motion.span>
+              <AnimatePresence>
+                {cartCount > 0 && (
+                  <motion.span
+                    key={cartCount}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                    className="absolute -top-2 -right-2 bg-rose text-ivory text-[11px] font-semibold min-w-[19px] h-[19px] px-1 rounded-full flex items-center justify-center"
+                  >
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Link>
 
             {/* Mobile menu toggle */}
@@ -243,6 +319,58 @@ const Navbar = () => {
           </div>
         </div>
         <div className="divider-gold" />
+
+        {/* Search panel — full-width, anchored right under Home / Shop / New Arrivals */}
+        <AnimatePresence>
+          {searchOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="overflow-hidden bg-ivory border-b border-line shadow-lg"
+            >
+              <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8">
+                <form onSubmit={handleSearchSubmit} className="flex items-center gap-3">
+                  <FaSearch className="text-charcoal/40 shrink-0" size={20} />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search rings, necklaces, earrings..."
+                    className="flex-1 bg-transparent outline-none text-xl font-display text-charcoal placeholder:text-charcoal/30"
+                  />
+                  <kbd className="hidden sm:block text-xs text-charcoal/40 border border-line rounded px-1.5 py-0.5 shrink-0">
+                    Esc
+                  </kbd>
+                  <button
+                    type="button"
+                    onClick={() => setSearchOpen(false)}
+                    aria-label="Close search"
+                    className="text-charcoal/40 hover:text-rose-dark transition-colors shrink-0"
+                  >
+                    <FaTimes size={18} />
+                  </button>
+                </form>
+
+                <div className="flex items-center gap-3 mt-5 flex-wrap">
+                  <span className="text-xs uppercase tracking-widest text-taupe">Popular:</span>
+                  {searchSuggestions.map((item) => (
+                    <Link
+                      key={item.label}
+                      to={item.to}
+                      onClick={() => setSearchOpen(false)}
+                      className="text-sm text-charcoal/70 border border-line rounded-full px-3.5 py-1.5 hover:border-rose hover:text-rose-dark transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Mobile menu panel */}
@@ -255,82 +383,73 @@ const Navbar = () => {
           className="absolute inset-0 bg-charcoal/40"
           onClick={() => setMobileOpen(false)}
         />
-        <div
-          className={`absolute top-0 right-0 h-full w-[78%] max-w-sm bg-ivory shadow-xl px-6 pt-24 pb-8 transition-transform duration-300 ${
+        <motion.div
+          variants={mobileMenuVariants}
+          initial="hidden"
+          animate={mobileOpen ? "visible" : "hidden"}
+          className={`absolute top-0 right-0 h-full w-[78%] max-w-sm bg-ivory shadow-xl px-6 pt-24 pb-8 transition-transform duration-300 overflow-y-auto ${
             mobileOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          <Link to="/" onClick={() => setMobileOpen(false)} className={mobileNavLink}>Home</Link>
-          <Link to="/shop" onClick={() => setMobileOpen(false)} className={mobileNavLink}>Shop</Link>
-          <Link to="/shop?category=new-arrivals" onClick={() => setMobileOpen(false)} className={mobileNavLink}>New Arrivals</Link>
-          <Link to="/wishlist" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
-            Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
-          </Link>
-          <Link to="/cart" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
-            Cart {cartCount > 0 && `(${cartCount})`}
-          </Link>
+          {user && (
+            <motion.p variants={mobileItemVariants} className="text-lg font-display text-charcoal mb-2">
+              Hi, {user.fullName?.split(" ")[0]}
+            </motion.p>
+          )}
+          <motion.div variants={mobileItemVariants}>
+            <Link to="/" onClick={() => setMobileOpen(false)} className={mobileNavLink}>Home</Link>
+          </motion.div>
+          <motion.div variants={mobileItemVariants}>
+            <Link to="/shop" onClick={() => setMobileOpen(false)} className={mobileNavLink}>Shop</Link>
+          </motion.div>
+          <motion.div variants={mobileItemVariants}>
+            <Link to="/shop?sort=Latest" onClick={() => setMobileOpen(false)} className={mobileNavLink}>New Arrivals</Link>
+          </motion.div>
+          <motion.div variants={mobileItemVariants}>
+            <Link to="/wishlist" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
+              <FaRegHeart size={16} /> Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
+            </Link>
+          </motion.div>
+          <motion.div variants={mobileItemVariants}>
+            <Link to="/cart" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
+              <FaShoppingBag size={16} /> Cart {cartCount > 0 && `(${cartCount})`}
+            </Link>
+          </motion.div>
 
-          <div className="mt-6">
+          <motion.div variants={mobileItemVariants} className="mt-6">
             {user ? (
               <>
                 <Link to="/profile" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
-                  My Profile
+                  <FaRegUser size={14} /> My Profile
                 </Link>
                 <Link to="/orders" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
-                  My Orders
+                  <FaBoxOpen size={14} /> My Orders
                 </Link>
                 <Link to="/seller" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
-                  Seller Dashboard
+                  <FaStore size={14} /> Seller
                 </Link>
                 <button
                   onClick={() => {
                     setMobileOpen(false);
                     handleLogout();
                   }}
-                  className="mt-3 text-[15px] text-rose-dark font-medium"
+                  className="mt-3 flex items-center gap-2 text-[15px] text-rose-dark font-medium"
                 >
-                  Logout
+                  <FaSignOutAlt size={14} /> Logout
                 </button>
               </>
             ) : (
               <Link
                 to="/login"
                 onClick={() => setMobileOpen(false)}
-                className="text-[15px] text-rose-dark font-medium"
+                className="flex items-center gap-2 text-[15px] text-rose-dark font-medium"
               >
-                Login
+                <FaRegUser size={14} /> Login
               </Link>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
-
-      {/* Search overlay */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-24 px-4">
-          <div
-            className="absolute inset-0 bg-charcoal/40"
-            onClick={() => setSearchOpen(false)}
-          />
-          <form
-            onSubmit={handleSearchSubmit}
-            className="relative w-full max-w-xl bg-ivory rounded-xl shadow-2xl border border-line p-4 flex items-center gap-3"
-          >
-            <FaSearch className="text-charcoal/50" size={18} />
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search products..."
-              className="flex-1 bg-transparent outline-none text-[16px] text-charcoal placeholder:text-charcoal/40"
-            />
-            <kbd className="hidden sm:block text-xs text-charcoal/40 border border-line rounded px-1.5 py-0.5">
-              Esc
-            </kbd>
-          </form>
-        </div>
-      )}
     </>
   );
 };
