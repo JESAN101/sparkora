@@ -1,6 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { login as loginApi, register as registerApi, getProfile } from "../services/authService";
+import {
+  login as loginApi,
+  register as registerApi,
+  verifyOTP as verifyOTPApi,
+  resendOTP as resendOTPApi,
+  getProfile,
+} from "../services/authService";
 
 const AuthContext = createContext();
 
@@ -32,15 +38,33 @@ export const AuthProvider = ({ children }) => {
     const data = await loginApi({ email, password });
     localStorage.setItem("token", data.token);
     setUser(data.user);
-    toast.success(`Welcome back, ${data.user.fullName}`);
+    toast.success(`Welcome back, ${data.user.firstName}`);
   };
 
-  const register = async ({ name, email, password, phone }) => {
-    await registerApi({ fullName: name, email, password, phone });
-    // auto-login right after registering
-    await login({ email, password });
-    toast.success(`Welcome to Sparkora, ${name.split(" ")[0]}`);
-  };
+  
+  const register = async (data) => {
+  return await registerApi(data);
+};
+
+const verifyOTP = async ({ email, otp }) => {
+  const data = await verifyOTPApi({ email, otp });
+
+  localStorage.setItem("token", data.token);
+
+  setUser(data.user);
+
+  toast.success("Email verified successfully.");
+
+  return data;
+};
+
+const resendOTP = async (email) => {
+  const data = await resendOTPApi({ email });
+
+  toast.success(data.message);
+
+  return data;
+};
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -49,7 +73,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider
+  value={{
+    user,
+    login,
+    register,
+    verifyOTP,
+    resendOTP,
+    logout,
+    loading,
+  }}
+>
       {children}
     </AuthContext.Provider>
   );

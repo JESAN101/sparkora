@@ -2,7 +2,13 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    fullName: {
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    lastName: {
       type: String,
       required: true,
       trim: true,
@@ -16,15 +22,22 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
-    },
-
     phone: {
       type: String,
       default: "",
+      trim: true,
+    },
+
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other"],
+      default: "Male",
+    },
+
+    password: {
+      type: String,
+      required: true,
+      minlength: 8,
     },
 
     role: {
@@ -34,11 +47,21 @@ const userSchema = new mongoose.Schema(
     },
 
     isVerified: {
-      type: Boolean,
-      default: false,
-    },
+  type: Boolean,
+  default: false,
+},
 
-    isBlocked: {
+emailOTP: {
+  type: String,
+  default: null,
+},
+
+otpExpires: {
+  type: Date,
+  default: null,
+},
+
+isBlocked: {
   type: Boolean,
   default: false,
 },

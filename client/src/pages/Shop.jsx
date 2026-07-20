@@ -19,12 +19,12 @@ const Shop = () => {
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState(initialCategory);
-  const [sort, setSort] = useState("Latest");
+  const [sort, setSort] = useState("Default");
 
    useEffect(() => {
     setSearch(searchParams.get("search") || "");
     setCategory(searchParams.get("category") || "All");
-    setSort(searchParams.get("sort") || "Latest");
+    setSort(searchParams.get("sort") || "Default");
   }, [searchParams]);
 
   useEffect(() => {
@@ -55,19 +55,29 @@ const Shop = () => {
       filtered = filtered.filter((product) => product.category === category);
     }
 
-    switch (sort) {
-      case "Price: Low to High":
-        filtered.sort((a, b) => a.discountPrice - b.discountPrice);
-        break;
-      case "Price: High to Low":
-        filtered.sort((a, b) => b.discountPrice - a.discountPrice);
-        break;
-      case "Highest Rated":
-        filtered.sort((a, b) => b.rating - a.rating);
-        break;
-      default:
-        break;
-    }
+ switch (sort) {
+  case "Latest":
+    filtered = filtered.filter(
+      (product) => product.newArrival === true
+    );
+    break;
+
+  case "Price: Low to High":
+    filtered.sort((a, b) => a.discountPrice - b.discountPrice);
+    break;
+
+  case "Price: High to Low":
+    filtered.sort((a, b) => b.discountPrice - a.discountPrice);
+    break;
+
+  case "Highest Rated":
+    filtered.sort((a, b) => b.rating - a.rating);
+    break;
+
+  case "Default":
+  default:
+    break;
+}
 
     return filtered;
   }, [products, search, category, sort]);

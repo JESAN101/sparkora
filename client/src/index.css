@@ -114,3 +114,22 @@ h1, h2, h3, h4,
   background: var(--color-rose-light);
   color: var(--color-charcoal);
 }
+
+/* ===== Sparkora Animations ===== */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fadeUp .8s ease forwards;
+}
+

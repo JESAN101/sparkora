@@ -205,7 +205,7 @@ const Navbar = () => {
                   >
                     <FaRegUser size={19} />
                     <span className="text-sm font-medium hidden lg:block">
-                      Hi, {user.fullName?.split(" ")[0]}
+                      Hi, {user.firstName?.split(" ")[0]}
                     </span>
                     <FaChevronDown
                       size={11}
@@ -393,7 +393,7 @@ const Navbar = () => {
         >
           {user && (
             <motion.p variants={mobileItemVariants} className="text-lg font-display text-charcoal mb-2">
-              Hi, {user.fullName?.split(" ")[0]}
+              Hi, {user.firstName?.split(" ")[0]}
             </motion.p>
           )}
           <motion.div variants={mobileItemVariants}>

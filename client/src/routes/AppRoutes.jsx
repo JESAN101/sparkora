@@ -4,6 +4,9 @@ import MainLayout from "../layouts/MainLayout";
 import SellerDashboardLayout from "../layouts/SellerDashboardLayout";
 import AdminLayout from "../layouts/AdminLayout";
 
+import ProtectedRoute from "../components/ProtectedRoute";
+import PublicRoute from "../components/PublicRoute";
+
 // Public Pages
 import Home from "../pages/Home";
 import Shop from "../pages/Shop";
@@ -18,6 +21,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Profile from "../pages/Profile";
 import NotFound from "../pages/NotFound";
+import VerifyOTP from "../pages/VerifyOTP";
 
 // Seller Pages
 import DashboardHome from "../pages/seller/DashboardHome";
@@ -40,7 +44,7 @@ const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
 
-        {/* Public Pages */}
+        {/* ================= PUBLIC ================= */}
 
         <Route
           path="/"
@@ -87,52 +91,68 @@ const AppRoutes = () => {
           }
         />
 
+        {/* ================= PROTECTED ================= */}
+
         <Route
           path="/checkout"
           element={
-            <MainLayout>
-              <Checkout />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <Checkout />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/order-success"
           element={
-            <MainLayout>
-              <OrderSuccess />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <OrderSuccess />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/profile"
           element={
-            <MainLayout>
-              <Profile />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <Profile />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/orders"
           element={
-            <MainLayout>
-              <MyOrders />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <MyOrders />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/orders/:id"
           element={
-            <MainLayout>
-              <OrderDetails />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <OrderDetails />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
 
-        {/* Seller Dashboard */}
+        {/* ================= OTP ================= */}
+
+        <Route path="/verify-otp" element={<VerifyOTP />} />
+
+        {/* ================= SELLER ================= */}
 
         <Route path="/seller" element={<SellerDashboardLayout />}>
           <Route index element={<DashboardHome />} />
@@ -144,7 +164,7 @@ const AppRoutes = () => {
           <Route path="analytics" element={<Analytics />} />
         </Route>
 
-        {/* Admin Dashboard */}
+        {/* ================= ADMIN ================= */}
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
@@ -154,12 +174,27 @@ const AppRoutes = () => {
           <Route path="orders" element={<Orders />} />
         </Route>
 
-        {/* Authentication */}
+        {/* ================= AUTH ================= */}
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
 
-        {/* 404 */}
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
+
+        {/* ================= 404 ================= */}
 
         <Route
           path="*"
