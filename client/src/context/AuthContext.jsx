@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { showSuccess } from "../utils/toast";
 import {
   login as loginApi,
   register as registerApi,
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
     const data = await loginApi({ email, password });
     localStorage.setItem("token", data.token);
     setUser(data.user);
-    toast.success(`Welcome back, ${data.user.firstName}`);
+    showSuccess(`Welcome back, ${data.user.firstName}`);
   };
 
   
@@ -53,7 +53,7 @@ const verifyOTP = async ({ email, otp }) => {
 
   setUser(data.user);
 
-  toast.success("Email verified successfully.");
+  showSuccess("Email verified successfully.");
 
   return data;
 };
@@ -61,7 +61,7 @@ const verifyOTP = async ({ email, otp }) => {
 const resendOTP = async (email) => {
   const data = await resendOTPApi({ email });
 
-  toast.success(data.message);
+  showSuccess(data.message);
 
   return data;
 };
@@ -69,7 +69,7 @@ const resendOTP = async (email) => {
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
-    toast.success("Logged out");
+    showSuccess("Logged out");
   };
 
   return (

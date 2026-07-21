@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { FaRedoAlt } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
-import toast from "react-hot-toast";
+import { showSuccess, showError } from "../utils/toast";
 import registerBg from "../assets/images/register-bg.jpg";
+
+const OTP_TIMER_SECONDS = 60;
+const getTimerStorageKey = (email) => `otpTimerExpiry_${email}`;
 
 const VerifyOTP = () => {
   const navigate = useNavigate();
@@ -13,8 +17,9 @@ const VerifyOTP = () => {
   const email = location.state?.email || "";
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const inputs = useRef([]);
 
@@ -25,16 +30,80 @@ const VerifyOTP = () => {
     }
   }, [email, navigate]);
 
-  // Countdown timer
+  // Countdown timer — persists across refresh by storing an expiry
+  // timestamp in localStorage (keyed by email) instead of just a
+  // plain decrementing number. On mount, if an expiry already exists
+  // for this email, we resume from it; otherwise we start a fresh one.
   useEffect(() => {
-    if (timer === 0) return;
+    if (!email) return;
 
-    const interval = setInterval(() => {
-      setTimer((prev) => prev - 1);
-    }, 1000);
+    const key = getTimerStorageKey(email);
+
+    let expiryStr = localStorage.getItem(key);
+
+    if (!expiryStr) {
+      const expiry = Date.now() + OTP_TIMER_SECONDS * 1000;
+      localStorage.setItem(key, expiry.toString());
+      expiryStr = expiry.toString();
+    }
+
+    const tick = () => {
+      const expiry = parseInt(localStorage.getItem(key), 10);
+      const remaining = Math.max(
+        0,
+        Math.round((expiry - Date.now()) / 1000)
+      );
+      setTimer(remaining);
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
 
     return () => clearInterval(interval);
-  }, [timer]);
+  }, [email]);
+
+  // Core verification logic, takes the code directly instead of reading
+  // it from `otp` state — avoids stale-closure issues when called right
+  // after setOtp() from handleChange/handlePaste.
+  const submitOtp = async (code) => {
+    if (code.length !== 6) {
+      showError("Please enter all 6 digits.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      await verifyOTP({
+        email,
+        otp: code,
+      });
+
+      // Verification succeeded — this email's OTP flow is done,
+      // so clear its stored timer for a clean slate next time.
+      localStorage.removeItem(getTimerStorageKey(email));
+
+      showSuccess("Email verified successfully!");
+
+      navigate("/profile");
+    } catch (err) {
+      showError(
+        err?.response?.data?.message ||
+          "OTP verification failed."
+      );
+
+      // Clear boxes
+      setOtp(["", "", "", "", "", ""]);
+
+      inputs.current.forEach((input) => {
+        if (input) input.value = "";
+      });
+
+      inputs.current[0]?.focus();
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // OTP input
   const handleChange = (value, index) => {
@@ -50,9 +119,11 @@ const VerifyOTP = () => {
       inputs.current[index + 1]?.focus();
     }
 
-    // Auto verify when all digits entered
+    // Auto verify when all digits entered — use newOtp directly,
+    // not the (stale) otp state, since setOtp above hasn't
+    // re-rendered yet at this point in the same event.
     if (newOtp.every((digit) => digit !== "")) {
-      document.getElementById("otp-form")?.requestSubmit();
+      submitOtp(newOtp.join(""));
     }
   };
 
@@ -83,61 +154,30 @@ const VerifyOTP = () => {
 
     inputs.current[5]?.focus();
 
-    // Auto verify
-    setTimeout(() => {
-      document.getElementById("otp-form")?.requestSubmit();
-    }, 100);
+    // Auto verify — use the pasted digits directly, same reasoning as above.
+    submitOtp(digits.join(""));
   };
 
-  // Verify OTP
+  // Verify OTP (manual button / Enter key submit)
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const code = otp.join("");
-
-    if (code.length !== 6) {
-      toast.error("Please enter all 6 digits.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      await verifyOTP({
-        email,
-        otp: code,
-      });
-
-      toast.success("Email verified successfully!");
-
-      navigate("/profile");
-    } catch (err) {
-      toast.error(
-        err?.response?.data?.message ||
-          "OTP verification failed."
-      );
-
-      // Clear boxes
-      setOtp(["", "", "", "", "", ""]);
-
-      inputs.current.forEach((input) => {
-        if (input) input.value = "";
-      });
-
-      inputs.current[0]?.focus();
-    } finally {
-      setLoading(false);
-    }
+    await submitOtp(otp.join(""));
   };
 
   // Resend OTP
   const handleResend = async () => {
     try {
+      setResending(true);
+
       await resendOTP(email);
 
-      toast.success("A new OTP has been sent.");
+      showSuccess("A new OTP has been sent.");
 
-      setTimer(60);
+      // Start a fresh 60s window and persist its expiry so a
+      // refresh won't reset it either.
+      const expiry = Date.now() + OTP_TIMER_SECONDS * 1000;
+      localStorage.setItem(getTimerStorageKey(email), expiry.toString());
+      setTimer(OTP_TIMER_SECONDS);
 
       setOtp(["", "", "", "", "", ""]);
 
@@ -147,10 +187,12 @@ const VerifyOTP = () => {
 
       inputs.current[0]?.focus();
     } catch (err) {
-      toast.error(
+      showError(
         err?.response?.data?.message ||
           "Unable to resend OTP."
       );
+    } finally {
+      setResending(false);
     }
   };
 
@@ -215,9 +257,9 @@ const VerifyOTP = () => {
 
           <button
             type="submit"
-            disabled={loading || otp.join("").length !== 6}
+            disabled={loading}
             className={`btn-luxury w-full mt-8 py-4 rounded-xl uppercase tracking-[3px] text-sm font-semibold shadow-xl transition-all duration-300 ${
-              loading || otp.join("").length !== 6
+              loading
                 ? "opacity-60 cursor-not-allowed"
                 : "hover:scale-[1.02] active:scale-95"
             }`}
@@ -232,9 +274,9 @@ const VerifyOTP = () => {
             )}
           </button>
 
-          {/* Timer */}
+          {/* Timer / Resend */}
 
-          <div className="text-center mt-8">
+          <div className="flex flex-col items-center mt-8">
             {timer > 0 ? (
               <p className="text-sm text-taupe">
                 Resend OTP in{" "}
@@ -246,9 +288,24 @@ const VerifyOTP = () => {
               <button
                 type="button"
                 onClick={handleResend}
-                className="text-rose-dark font-semibold hover:text-burgundy transition"
+                disabled={resending}
+                className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border border-rose text-rose-dark font-semibold text-sm tracking-wide shadow-sm transition-all duration-300 ${
+                  resending
+                    ? "opacity-60 cursor-not-allowed"
+                    : "hover:bg-rose hover:text-white hover:shadow-md active:scale-95"
+                }`}
               >
-                Resend OTP
+                {resending ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-rose-dark border-t-transparent rounded-full animate-spin"></div>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <FaRedoAlt className="text-xs" />
+                    Resend OTP
+                  </>
+                )}
               </button>
             )}
           </div>

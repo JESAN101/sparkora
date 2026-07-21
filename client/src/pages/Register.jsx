@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../context/AuthContext";
+import { showError } from "../utils/toast";
 
 import {
   FaUser,
@@ -57,13 +58,21 @@ const Register = () => {
     try {
       await registerUser(data);
 
-navigate("/verify-otp", {
-  state: {
-    email: data.email,
-  },
-});
+      navigate("/verify-otp", {
+        state: {
+          email: data.email,
+        },
+      });
     } catch (err) {
       console.error(err);
+
+      const message = err?.response?.data?.message || "";
+
+      if (message.toLowerCase().includes("already registered")) {
+        showError("This email is already registered.");
+      } else {
+        showError(message || "Registration failed. Please try again.");
+      }
     }
   };
 
@@ -141,7 +150,7 @@ navigate("/verify-otp", {
 
                     <input
                       type="text"
-                      placeholder="First Name"
+                      placeholder="e.g. Jesan"
                       {...register("firstName", {
                         required: "First name is required",
                         setValueAs: (value) => value.trim(),
@@ -174,7 +183,7 @@ navigate("/verify-otp", {
 
                     <input
                       type="text"
-                      placeholder="Last Name"
+                      placeholder="e.g. Bogati"
                       {...register("lastName", {
                         required: "Last name is required",
                         setValueAs: (value) => value.trim(),
@@ -210,7 +219,7 @@ navigate("/verify-otp", {
 
                     <input
                       type="email"
-                      placeholder="name@example.com"
+                      placeholder="name@eg.com"
                       {...register("email", {
                         required: "Email is required",
                         setValueAs: (value) => value.trim().toLowerCase(),
@@ -242,7 +251,7 @@ navigate("/verify-otp", {
                       type="tel"
                       inputMode="numeric"
                       maxLength={10}
-                      placeholder="98XXXXXXXX"
+                      placeholder="98xxxxxxxx"
                       {...register("phone", {
                         required: "Phone number is required",
                         pattern: {
@@ -498,7 +507,7 @@ navigate("/verify-otp", {
                 {isSubmitting ? (
                   <div className="flex items-center justify-center gap-3">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Creating Account...
+                    Sending OTP, Check your mail...
                   </div>
                 ) : (
                   "Register & Send OTP"
