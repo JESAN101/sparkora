@@ -237,7 +237,7 @@ const Navbar = () => {
                           <FaBoxOpen size={13} /> My Orders
                         </Link>
                         <Link
-                          to="/seller"
+                          to="/become-seller"
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
                         >

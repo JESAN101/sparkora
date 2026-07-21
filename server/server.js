@@ -18,6 +18,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import { sanitizeInput } from "./middleware/sanitizeMiddleware.js";
 import { authLimiter, generalLimiter } from "./middleware/rateLimitMiddleware.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import adminSellerRoutes from "./routes/adminSellerRoutes.js";
 
 connectDB();
 
@@ -69,6 +70,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/seller", sellerRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin", adminSellerRoutes);
 
 app.get("/", (req, res) => {
   res.json({

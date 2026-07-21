@@ -513,21 +513,31 @@ export const loginUser = async (req, res) => {
       }
     );
 
-    res.status(200).json({
-      success: true,
-      message: "Login successful.",
-      token,
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        fullName: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        phone: user.phone,
-        gender: user.gender,
-        role: user.role,
-      },
-    });
+    const showSellerWelcome =
+  user.role === "seller" &&
+  !user.sellerApprovalNotified;
+
+if (showSellerWelcome) {
+  user.sellerApprovalNotified = true;
+  await user.save();
+}
+
+res.status(200).json({
+  success: true,
+  message: "Login successful.",
+  token,
+  showSellerWelcome,
+  user: {
+    id: user._id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    fullName: `${user.firstName} ${user.lastName}`,
+    email: user.email,
+    phone: user.phone,
+    gender: user.gender,
+    role: user.role,
+  },
+});
   } catch (error) {
   console.error(error);
 

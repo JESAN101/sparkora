@@ -87,28 +87,42 @@ const Users = () => {
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {users.map((user) => (
               <tr key={user._id} className="border-b">
-                <td className="p-3">{user.fullName}</td>
+                <td className="p-3">
+                  {user.firstName} {user.lastName}
+                </td>
+
                 <td>{user.email}</td>
+
                 <td>{user.phone}</td>
+
                 <td>
                   <span
                     className={`px-2 py-1 rounded text-white ${
-                      user.role === "admin" ? "bg-purple-600" : "bg-blue-600"
+                      user.role === "admin"
+                        ? "bg-purple-600"
+                        : "bg-blue-600"
                     }`}
                   >
                     {user.role}
                   </span>
                 </td>
+
                 <td>
                   {user.isBlocked ? (
-                    <span className="text-red-600 font-semibold">Blocked</span>
+                    <span className="text-red-600 font-semibold">
+                      Blocked
+                    </span>
                   ) : (
-                    <span className="text-green-600 font-semibold">Active</span>
+                    <span className="text-green-600 font-semibold">
+                      Active
+                    </span>
                   )}
                 </td>
+
                 <td className="space-x-2">
                   <button
                     onClick={() => handleRole(user._id, user.role)}
@@ -116,14 +130,18 @@ const Users = () => {
                   >
                     Change Role
                   </button>
+
                   <button
                     onClick={() => handleBlock(user._id, user.isBlocked)}
                     className={`px-3 py-1 text-white rounded ${
-                      user.isBlocked ? "bg-green-600" : "bg-yellow-600"
+                      user.isBlocked
+                        ? "bg-green-600"
+                        : "bg-yellow-600"
                     }`}
                   >
                     {user.isBlocked ? "Unblock" : "Block"}
                   </button>
+
                   <button
                     onClick={() => handleDelete(user._id)}
                     className="px-3 py-1 bg-red-600 text-white rounded"
@@ -137,12 +155,17 @@ const Users = () => {
         </table>
 
         {users.length === 0 && (
-          <p className="text-center text-gray-500 py-8">No users found.</p>
+          <p className="text-center text-gray-500 py-8">
+            No users found.
+          </p>
         )}
       </div>
 
       {showAddModal && (
-        <AddUserModal onClose={() => setShowAddModal(false)} onCreated={handleUserCreated} />
+        <AddUserModal
+          onClose={() => setShowAddModal(false)}
+          onCreated={handleUserCreated}
+        />
       )}
     </div>
   );

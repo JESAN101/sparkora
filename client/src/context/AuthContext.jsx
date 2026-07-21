@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { showSuccess, showError } from "../utils/toast";
+import { showSuccess } from "../utils/toast";
 import {
   login as loginApi,
   register as registerApi,
@@ -38,11 +38,23 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async ({ email, password }) => {
-    const data = await loginApi({ email, password });
-    localStorage.setItem("token", data.token);
-    setUser(data.user);
+  const data = await loginApi({ email, password });
+
+  localStorage.setItem("token", data.token);
+
+  setUser(data.user);
+
+  // Show seller approval message only once
+  if (data.showSellerWelcome) {
+    showSuccess(
+      "🎉 Congratulations! Your seller application has been approved. You can now access the Seller Dashboard."
+    );
+  } else {
     showSuccess(`Welcome back, ${data.user.firstName}`);
-  };
+  }
+
+  return data;
+};
 
   
   const register = async (data) => {
@@ -104,6 +116,16 @@ const resetPassword = async ({
   return data;
 };
 
+const refreshUser = async () => {
+  try {
+    const data = await getProfile();
+    setUser(data.user);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
@@ -122,6 +144,7 @@ const resetPassword = async ({
   forgotPassword,
   verifyResetOTP,
   resetPassword,
+  refreshUser,
 
   logout,
   loading,

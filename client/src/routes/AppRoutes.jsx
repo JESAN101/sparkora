@@ -25,6 +25,7 @@ import VerifyOTP from "../pages/VerifyOTP";
 import ForgotPassword from "../pages/ForgotPassword";
 import VerifyResetOTP from "../pages/VerifyResetOTP";
 import ResetPassword from "../pages/ResetPassword";
+import BecomeSeller from "../pages/BecomeSeller";
 
 // Seller Pages
 import DashboardHome from "../pages/seller/DashboardHome";
@@ -41,6 +42,7 @@ import Users from "../pages/admin/Users";
 import Products from "../pages/admin/Products";
 import Orders from "../pages/admin/Orders";
 import AdminEditProduct from "../pages/admin/EditProduct";
+import SellerApplications from "../pages/admin/SellerApplications";
 
 const AppRoutes = () => {
   return (
@@ -94,6 +96,17 @@ const AppRoutes = () => {
           }
         />
 
+        <Route
+  path="/become-seller"
+  element={
+    <ProtectedRoute>
+      <MainLayout>
+        <BecomeSeller />
+      </MainLayout>
+    </ProtectedRoute>
+  }
+/>
+        
         {/* ================= PROTECTED ================= */}
 
         <Route
@@ -175,6 +188,10 @@ const AppRoutes = () => {
           <Route path="products" element={<Products />} />
           <Route path="products/:id/edit" element={<AdminEditProduct />} />
           <Route path="orders" element={<Orders />} />
+          <Route
+  path="seller-applications"
+  element={<SellerApplications />}
+/>
         </Route>
 
         {/* ================= AUTH ================= */}
