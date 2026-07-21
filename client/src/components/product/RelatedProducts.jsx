@@ -3,18 +3,17 @@ import { getProducts } from "../../services/productService";
 import { normalizeProduct } from "../../utils/normalizeProduct";
 import ProductCard from "./ProductCard";
 
-const RelatedProducts = ({
-  currentProduct,
-}) => {
+const RelatedProducts = ({ currentProduct }) => {
   const [related, setRelated] = useState([]);
 
   useEffect(() => {
     const fetchRelated = async () => {
       try {
         const data = await getProducts();
-        const all = (data.products || data).map(normalizeProduct);
 
-        const filtered = all
+        const allProducts = (data.products || data).map(normalizeProduct);
+
+        const filtered = allProducts
           .filter(
             (item) =>
               item.category === currentProduct.category &&
@@ -33,33 +32,42 @@ const RelatedProducts = ({
     }
   }, [currentProduct]);
 
+  if (related.length === 0) return null;
+
   return (
+    <section className="mt-28">
 
-    <section className="mt-24">
+      {/* Section Header */}
 
-      <h2 className="text-4xl font-bold mb-10">
+      <div className="text-center mb-14">
 
-        Related Products
+        <p className="uppercase tracking-[0.35em] text-xs text-gold font-medium">
+          You May Also Like
+        </p>
 
-      </h2>
+        <h2 className="font-display text-5xl text-charcoal mt-3">
+          Related Products
+        </h2>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="divider-gold mt-6 max-w-xs mx-auto" />
+
+      </div>
+
+      {/* Products */}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8">
 
         {related.map((product) => (
-
           <ProductCard
             key={product.id}
             product={product}
           />
-
         ))}
 
       </div>
 
     </section>
-
   );
-
 };
 
 export default RelatedProducts;

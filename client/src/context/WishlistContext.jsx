@@ -44,21 +44,37 @@ export const WishlistProvider = ({ children }) => {
     const syncOnLogin = async () => {
       setLoading(true);
       try {
-        const guestItems = JSON.parse(localStorage.getItem(GUEST_WISHLIST_KEY) || "[]");
+        const guestItems = JSON.parse(
+  localStorage.getItem(GUEST_WISHLIST_KEY) || "[]"
+);
 
-        for (const item of guestItems) {
-          try {
-            await addWishlistItem(item.id);
-          } catch (itemErr) {
-            // Skip items that fail (e.g. stale/invalid ids) instead of
-            // aborting the sync for every other item in the wishlist.
-            console.error(`Skipping wishlist item ${item.id}:`, itemErr?.response?.data || itemErr);
-          }
-        }
-        localStorage.removeItem(GUEST_WISHLIST_KEY);
+// Get server wishlist first
+const serverWishlist = await getWishlist();
 
-        const data = await getWishlist();
-        setWishlist(data.wishlist.items.map(normalizeWishlistItem));
+const serverIds = serverWishlist.wishlist.items.map(
+  (item) => item.product._id
+);
+
+// Only add products that don't already exist
+for (const item of guestItems) {
+  if (!serverIds.includes(item.id)) {
+    try {
+      await addWishlistItem(item.id);
+    } catch (itemErr) {
+      console.error(itemErr);
+    }
+  }
+}
+
+// Remove guest wishlist
+localStorage.removeItem(GUEST_WISHLIST_KEY);
+
+// Reload latest wishlist
+const updatedWishlist = await getWishlist();
+
+setWishlist(
+  updatedWishlist.wishlist.items.map(normalizeWishlistItem)
+);
       } catch (err) {
         console.error("Wishlist sync failed:", err?.response?.data || err);
       } finally {

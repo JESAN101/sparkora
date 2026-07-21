@@ -46,21 +46,37 @@ export const CartProvider = ({ children }) => {
     const syncOnLogin = async () => {
       setLoading(true);
       try {
-        const guestItems = JSON.parse(localStorage.getItem(GUEST_CART_KEY) || "[]");
+        const guestItems = JSON.parse(
+  localStorage.getItem(GUEST_CART_KEY) || "[]"
+);
 
-        for (const item of guestItems) {
-          try {
-            await addCartItem(item.id, item.quantity);
-          } catch (itemErr) {
-            // Skip items that fail (e.g. stale/invalid ids) instead of
-            // aborting the sync for every other item in the cart.
-            console.error(`Skipping cart item ${item.id}:`, itemErr?.response?.data || itemErr);
-          }
-        }
-        localStorage.removeItem(GUEST_CART_KEY);
+// Get current server cart first
+const serverCart = await getCart();
 
-        const data = await getCart();
-        setCartItems(data.cart.items.map(normalizeCartItem));
+const serverIds = serverCart.cart.items.map(
+  (item) => item.product._id
+);
+
+// Only add products that don't already exist
+for (const item of guestItems) {
+  if (!serverIds.includes(item.id)) {
+    try {
+      await addCartItem(item.id, item.quantity);
+    } catch (itemErr) {
+      console.error(itemErr);
+    }
+  }
+}
+
+// Clear guest cart after merging
+localStorage.removeItem(GUEST_CART_KEY);
+
+// Reload latest cart
+const updatedCart = await getCart();
+
+setCartItems(
+  updatedCart.cart.items.map(normalizeCartItem)
+);
       } catch (err) {
         console.error("Cart sync failed:", err?.response?.data || err);
       } finally {

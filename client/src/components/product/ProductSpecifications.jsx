@@ -1,51 +1,61 @@
 const ProductSpecifications = ({ product }) => {
   return (
-    <div className="mt-10 border-t pt-8">
+    <div className="mt-10 border-t border-line pt-8">
 
-      <h2 className="text-2xl font-bold mb-6">
+      <h2 className="font-display text-2xl font-semibold text-charcoal mb-6">
         Specifications
       </h2>
 
       <div className="space-y-4">
 
-        <div className="flex justify-between">
-          <span className="text-gray-500">
+        <div className="flex justify-between items-center pb-3 border-b border-line">
+          <span className="text-taupe">
             Material
           </span>
 
-          <span>{product.material}</span>
+          <span className="font-medium text-charcoal">
+            {product.material}
+          </span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-500">
+        <div className="flex justify-between items-center pb-3 border-b border-line">
+          <span className="text-taupe">
             Gemstone
           </span>
 
-          <span>{product.gemstone}</span>
+          <span className="font-medium text-charcoal">
+            {product.gemstone}
+          </span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-500">
+        <div className="flex justify-between items-center pb-3 border-b border-line">
+          <span className="text-taupe">
             Purity
           </span>
 
-          <span>{product.purity}</span>
+          <span className="font-medium text-charcoal">
+            {product.purity}
+          </span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-500">
+        <div className="flex justify-between items-center pb-3 border-b border-line">
+          <span className="text-taupe">
             Weight
           </span>
 
-          <span>{product.weight}</span>
+          <span className="font-medium text-charcoal">
+            {product.weight}
+          </span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-500">
+        <div className="flex justify-between items-center">
+          <span className="text-taupe">
             Warranty
           </span>
 
-          <span>{product.warranty}</span>
+          <span className="font-medium text-charcoal">
+            {product.warranty}
+          </span>
         </div>
 
       </div>

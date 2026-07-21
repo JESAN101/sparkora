@@ -12,6 +12,8 @@ import {
   FaSignOutAlt,
   FaBoxOpen,
   FaStore,
+  FaMoon,
+  FaSun,
 } from "react-icons/fa";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
@@ -37,6 +39,9 @@ const Navbar = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [darkMode, setDarkMode] = useState(() => {
+  return localStorage.getItem("theme") === "dark";
+});
 
   const userMenuRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -117,6 +122,16 @@ const Navbar = () => {
     };
   }, [mobileOpen]);
 
+  useEffect(() => {
+  if (darkMode) {
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("theme", "dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("theme", "light");
+  }
+}, [darkMode]);
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -171,6 +186,14 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-5 text-charcoal">
+
+            <button
+  onClick={() => setDarkMode(!darkMode)}
+  className="text-charcoal hover:text-rose-dark transition-colors"
+  aria-label="Toggle Theme"
+>
+  {darkMode ? <FaSun size={18} /> : <FaMoon size={18} />}
+</button>
             {/* Search trigger */}
             <motion.button
               whileHover={{ scale: 1.08 }}

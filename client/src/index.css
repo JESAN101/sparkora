@@ -2,11 +2,8 @@
 
 /* ============================================
    SPARKORA DESIGN SYSTEM
-   Fine-jewelry palette: warm ivory, rose gold,
-   antique gold, deep burgundy. Cormorant Garamond
-   for display type (the "engraving" face), Manrope
-   for UI/body (clean, doesn't compete with it).
-   ============================================ */
+============================================ */
+
 @theme {
   --font-display: "Cormorant Garamond", "Georgia", serif;
   --font-body: "Manrope", "Segoe UI", sans-serif;
@@ -30,94 +27,251 @@
   --color-burgundy-light: #8f2c48;
 }
 
+/* ============================================
+   LIGHT THEME
+============================================ */
+
+:root {
+  --color-ivory: #fbf7f2;
+  --color-cream: #f3eae0;
+  --color-blush: #f6e3db;
+  --color-line: #e6d9cd;
+
+  --color-charcoal: #251d20;
+  --color-taupe: #6f6058;
+
+  --color-rose: #b3735a;
+  --color-rose-light: #d9a98c;
+  --color-rose-dark: #8f5a44;
+
+  --color-gold: #b4913f;
+  --color-gold-light: #d9c07f;
+
+  --color-burgundy: #6d1b34;
+  --color-burgundy-light: #8f2c48;
+}
+
+/* ============================================
+   DARK THEME
+============================================ */
+
+.dark {
+  /* Main Backgrounds */
+  --color-ivory: #17161b;
+  --color-cream: #1d1c22;
+  --color-blush: #26242b;
+
+  /* Borders */
+  --color-line: #37353d;
+
+  /* Typography */
+  --color-charcoal: #f8f5ef;
+  --color-taupe: #b8b5af;
+
+  /* Rose Gold */
+  --color-rose: #ca9073;
+  --color-rose-light: #ddb49b;
+  --color-rose-dark: #e4b89d;
+
+  /* Gold */
+  --color-gold: #d4af37;
+  --color-gold-light: #edd57d;
+
+  /* Burgundy */
+  --color-burgundy: #b94f72;
+  --color-burgundy-light: #d87695;
+}
+
+/* ============================================
+   GLOBAL
+============================================ */
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  background-color: var(--color-ivory);
+  background: var(--color-ivory);
   color: var(--color-charcoal);
   font-family: var(--font-body);
+
+  transition:
+    background-color .35s ease,
+    color .35s ease;
 }
 
-h1, h2, h3, h4,
+/* Luxury dark background */
+
+.dark body {
+  background:
+    radial-gradient(circle at top,
+      #27242f 0%,
+      #17161b 55%);
+}
+
+h1,
+h2,
+h3,
+h4,
 .font-display {
   font-family: var(--font-display);
 }
 
-/* Thin gold rule used as a section signature throughout the site */
+/* ============================================
+   NAVBAR
+============================================ */
+
+.dark nav {
+  background: rgba(23,22,27,.92) !important;
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--color-line);
+}
+
+/* ============================================
+   DIVIDER
+============================================ */
+
 .divider-gold {
   height: 1px;
+
   background: linear-gradient(
     90deg,
     transparent,
-    var(--color-gold) 50%,
+    var(--color-gold),
     transparent
   );
 }
 
-/* Primary CTA — brushed gold, used for "Proceed to Checkout", "Place Order" etc */
+.dark .divider-gold {
+  opacity: .45;
+}
+
+/* ============================================
+   BUTTONS
+============================================ */
+
 .btn-luxury {
   font-family: var(--font-body);
   font-weight: 600;
-  letter-spacing: 0.02em;
-  background: linear-gradient(135deg, var(--color-rose) 0%, var(--color-rose-dark) 100%);
+  letter-spacing: .02em;
+
+  background: linear-gradient(
+    135deg,
+    var(--color-rose),
+    var(--color-rose-dark)
+  );
+
   color: var(--color-ivory);
-  transition: all 0.3s ease;
+
+  transition: all .3s ease;
 }
+
 .btn-luxury:hover {
-  background: linear-gradient(135deg, var(--color-rose-dark) 0%, var(--color-burgundy) 100%);
-  box-shadow: 0 10px 25px -8px rgba(109, 27, 52, 0.45);
-  transform: translateY(-1px);
+  background: linear-gradient(
+    135deg,
+    var(--color-rose-dark),
+    var(--color-burgundy)
+  );
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 15px 35px rgba(109,27,52,.35);
 }
+
 .btn-luxury:disabled {
-  opacity: 0.5;
+  opacity: .5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
 }
 
 .btn-luxury-outline {
-  font-family: var(--font-body);
-  font-weight: 600;
-  letter-spacing: 0.02em;
   background: transparent;
   color: var(--color-rose-dark);
   border: 1.5px solid var(--color-rose);
-  transition: all 0.3s ease;
+
+  transition: all .3s ease;
 }
+
 .btn-luxury-outline:hover {
   background: var(--color-rose);
   color: var(--color-ivory);
 }
 
-/* Jewelry-tray card: soft lift + hairline gold cap, used for cart items,
-   summary panels — evokes a lined presentation box rather than a generic card */
-.card-luxury {
-  background: #ffffff;
-  border: 1px solid var(--color-line);
-  border-radius: 1.25rem;
-  box-shadow: 0 2px 10px -4px rgba(37, 29, 32, 0.06);
-  position: relative;
+/* Luxury dark outline */
+
+.dark .btn-luxury-outline {
+  color: var(--color-gold-light);
+  border: 1px solid var(--color-gold);
 }
+
+.dark .btn-luxury-outline:hover {
+  background: var(--color-gold);
+  color: #111;
+}
+
+/* ============================================
+   CARD
+============================================ */
+
+.card-luxury {
+  background: var(--color-cream);
+  border: 1px solid var(--color-line);
+  border-radius: 20px;
+
+  position: relative;
+
+  transition:
+    background-color .35s ease,
+    border-color .35s ease;
+
+  box-shadow:
+    0 5px 18px rgba(0,0,0,.05);
+}
+
 .card-luxury::before {
   content: "";
+
   position: absolute;
+
+  left: 24px;
+  right: 24px;
   top: 0;
-  left: 1.5rem;
-  right: 1.5rem;
+
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-gold-light), transparent);
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-gold-light),
+    transparent
+  );
 }
+
+.dark .card-luxury {
+  background: #211f26;
+
+  border: 1px solid var(--color-line);
+
+  box-shadow:
+      0 12px 40px rgba(0,0,0,.35);
+}
+
+/* ============================================
+   TEXT SELECTION
+============================================ */
 
 ::selection {
-  background: var(--color-rose-light);
-  color: var(--color-charcoal);
+  background: var(--color-gold);
+  color: #111;
 }
 
-/* ===== Sparkora Animations ===== */
+/* ============================================
+   ANIMATIONS
+============================================ */
 
 @keyframes fadeUp {
+
   from {
     opacity: 0;
     transform: translateY(25px);
@@ -127,9 +281,14 @@ h1, h2, h3, h4,
     opacity: 1;
     transform: translateY(0);
   }
+
 }
 
 .fade-up {
   animation: fadeUp .8s ease forwards;
 }
 
+.dark .wishlist-button {
+  background: rgba(30, 30, 35, 0.8);
+  color: var(--color-charcoal);
+}

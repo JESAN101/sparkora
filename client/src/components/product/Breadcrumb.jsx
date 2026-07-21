@@ -1,32 +1,44 @@
 import { Link } from "react-router-dom";
+import { FaChevronRight } from "react-icons/fa";
 
 const Breadcrumb = ({ product }) => {
   return (
-    <nav className="flex items-center gap-2 text-sm text-gray-500 mb-10">
+    <nav className="flex flex-wrap items-center gap-2 text-sm mb-10">
 
       <Link
         to="/"
-        className="hover:text-pink-600 transition"
+        className="text-taupe hover:text-rose transition-colors"
       >
         Home
       </Link>
 
-      <span>/</span>
+      <FaChevronRight
+        size={10}
+        className="text-line"
+      />
 
       <Link
         to="/shop"
-        className="hover:text-pink-600 transition"
+        className="text-taupe hover:text-rose transition-colors"
       >
         Shop
       </Link>
 
-      <span>/</span>
+      <FaChevronRight
+        size={10}
+        className="text-line"
+      />
 
-      <span>{product.category}</span>
+      <span className="text-taupe">
+        {product.category}
+      </span>
 
-      <span>/</span>
+      <FaChevronRight
+        size={10}
+        className="text-line"
+      />
 
-      <span className="text-gray-900 font-semibold">
+      <span className="font-semibold text-charcoal">
         {product.name}
       </span>
 
