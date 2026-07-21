@@ -61,6 +61,16 @@ otpExpires: {
   default: null,
 },
 
+resetOTP: {
+  type: String,
+  default: null,
+},
+
+resetOTPExpires: {
+  type: Date,
+  default: null,
+},
+
 isBlocked: {
   type: Boolean,
   default: false,

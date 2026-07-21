@@ -1,10 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { showSuccess } from "../utils/toast";
+import { showSuccess, showError } from "../utils/toast";
 import {
   login as loginApi,
   register as registerApi,
   verifyOTP as verifyOTPApi,
   resendOTP as resendOTPApi,
+  forgotPassword as forgotPasswordApi,
+  verifyResetOTP as verifyResetOTPApi,
+  resetPassword as resetPasswordApi,
   getProfile,
 } from "../services/authService";
 
@@ -66,6 +69,41 @@ const resendOTP = async (email) => {
   return data;
 };
 
+const forgotPassword = async (email) => {
+  const data = await forgotPasswordApi({ email });
+
+  showSuccess(data.message);
+
+  return data;
+};
+
+const verifyResetOTP = async ({ email, otp }) => {
+  const data = await verifyResetOTPApi({
+    email,
+    otp,
+  });
+
+  showSuccess(data.message);
+
+  return data;
+};
+
+const resetPassword = async ({
+  email,
+  password,
+  confirmPassword,
+}) => {
+  const data = await resetPasswordApi({
+    email,
+    password,
+    confirmPassword,
+  });
+
+  showSuccess(data.message);
+
+  return data;
+};
+
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
@@ -75,14 +113,19 @@ const resendOTP = async (email) => {
   return (
     <AuthContext.Provider
   value={{
-    user,
-    login,
-    register,
-    verifyOTP,
-    resendOTP,
-    logout,
-    loading,
-  }}
+  user,
+  login,
+  register,
+  verifyOTP,
+  resendOTP,
+
+  forgotPassword,
+  verifyResetOTP,
+  resetPassword,
+
+  logout,
+  loading,
+}}
 >
       {children}
     </AuthContext.Provider>

@@ -71,6 +71,15 @@ const Login = () => {
             {errors.password && <p className="text-xs text-burgundy mt-1.5">{errors.password.message}</p>}
           </div>
 
+          <div className="flex justify-end mt-3">
+  <Link
+    to="/forgot-password"
+    className="text-sm font-medium text-rose-dark hover:text-burgundy transition duration-300"
+  >
+    Forgot Password?
+  </Link>
+</div>
+
           <button
             type="submit"
             disabled={isSubmitting}

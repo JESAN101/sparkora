@@ -22,6 +22,9 @@ import Register from "../pages/Register";
 import Profile from "../pages/Profile";
 import NotFound from "../pages/NotFound";
 import VerifyOTP from "../pages/VerifyOTP";
+import ForgotPassword from "../pages/ForgotPassword";
+import VerifyResetOTP from "../pages/VerifyResetOTP";
+import ResetPassword from "../pages/ResetPassword";
 
 // Seller Pages
 import DashboardHome from "../pages/seller/DashboardHome";
@@ -194,6 +197,33 @@ const AppRoutes = () => {
           }
         />
 
+        <Route
+  path="/forgot-password"
+  element={
+    <PublicRoute>
+      <ForgotPassword />
+    </PublicRoute>
+  }
+/>
+
+<Route
+  path="/verify-reset-otp"
+  element={
+    <PublicRoute>
+      <VerifyResetOTP />
+    </PublicRoute>
+  }
+/>
+
+<Route
+  path="/reset-password"
+  element={
+    <PublicRoute>
+      <ResetPassword />
+    </PublicRoute>
+  }
+/>
+
         {/* ================= 404 ================= */}
 
         <Route
@@ -209,5 +239,7 @@ const AppRoutes = () => {
     </BrowserRouter>
   );
 };
+
+
 
 export default AppRoutes;
