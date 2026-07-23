@@ -7,6 +7,8 @@ import {
   deleteProduct,
   getMyProducts,
   updateStock,
+  incrementProductViews,
+  getTrendingProducts,
 } from "../controllers/productController.js";
 import {
   getProductReviews,
@@ -29,7 +31,11 @@ router.get("/seller/my-products", protect, getMyProducts);
 
 router.get("/", getProducts);
 
+router.get("/trending", getTrendingProducts);
+
 router.get("/:id", getProductById);
+
+router.patch("/:id/view", incrementProductViews);
 
 router.post(
   "/",

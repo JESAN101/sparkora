@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-import { getProduct } from "../services/productService";
+import {
+  getProduct,
+  incrementProductViews,
+} from "../services/productService";
 import { normalizeProduct } from "../utils/normalizeProduct";
 
 import Breadcrumb from "../components/product/Breadcrumb";
@@ -25,7 +27,26 @@ const ProductDetails = () => {
 
         const data = await getProduct(id);
 
-        setProduct(normalizeProduct(data.product));
+setProduct(normalizeProduct(data.product));
+
+const viewKey = `product-view-${id}`;
+
+const lastViewed = localStorage.getItem(viewKey);
+
+const THIRTY_MINUTES = 30 * 60 * 1000;
+
+if (
+  !lastViewed ||
+  Date.now() - Number(lastViewed) > THIRTY_MINUTES
+) {
+  await incrementProductViews(id);
+
+  localStorage.setItem(
+    viewKey,
+    Date.now().toString()
+  );
+}
+
       } catch (err) {
         setNotFound(true);
       } finally {

@@ -117,13 +117,17 @@ export const placeOrder = async (req, res) => {
       totalAmount,
     });
 
-    // Decrement stock for every product that was just ordered
-    await Promise.all(
-      orderItems.map((item) =>
-        Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } })
-      )
-    );
-
+   // Update product statistics after purchase
+await Promise.all(
+  orderItems.map((item) =>
+    Product.findByIdAndUpdate(item.product, {
+      $inc: {
+        stock: -item.quantity,
+        purchaseCount: item.quantity,
+      },
+    })
+  )
+);
     // Order placed — empty the cart
     cart.items = [];
     await cart.save();

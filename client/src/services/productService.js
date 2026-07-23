@@ -44,3 +44,13 @@ export const updateStock = async (id, stock) => {
   const res = await API.patch(`/products/${id}/stock`, { stock });
   return res.data;
 };
+
+export const incrementProductViews = async (id) => {
+  const res = await API.patch(`/products/${id}/view`);
+  return res.data;
+};
+
+export const getTrendingProducts = async () => {
+  const res = await API.get("/products/trending");
+  return res.data;
+};

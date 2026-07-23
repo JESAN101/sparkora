@@ -57,10 +57,16 @@ export const addItemToCart = async (req, res) => {
     );
 
     if (existingItem) {
-      existingItem.quantity += Number(quantity);
-    } else {
-      cart.items.push({ product: productId, quantity: Number(quantity) });
-    }
+  existingItem.quantity += Number(quantity);
+} else {
+  cart.items.push({
+    product: productId,
+    quantity: Number(quantity),
+  });
+
+  product.cartCount += 1;
+  await product.save();
+}
 
     await cart.save();
     const cartWithProducts = await populatedCart(req.user._id);
@@ -114,34 +120,91 @@ export const removeCartItem = async (req, res) => {
     const { productId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ success: false, message: "Invalid productId" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid productId",
+      });
     }
 
     const cart = await getOrCreateCart(req.user._id);
-    cart.items = cart.items.filter((item) => item.product.toString() !== productId);
+
+    const existed = cart.items.some(
+      (item) => item.product.toString() === productId
+    );
+
+    cart.items = cart.items.filter(
+      (item) => item.product.toString() !== productId
+    );
 
     await cart.save();
+
+    if (existed) {
+      const product = await Product.findById(productId);
+
+      if (product) {
+        product.cartCount = Math.max(
+          product.cartCount - 1,
+          0
+        );
+
+        await product.save();
+      }
+    }
+
     const cartWithProducts = await populatedCart(req.user._id);
 
-    res.status(200).json({ success: true, cart: cartWithProducts });
+    res.status(200).json({
+      success: true,
+      cart: cartWithProducts,
+    });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
   }
 };
 
 // ==========================
 // Clear the entire cart
 // ==========================
+// ==========================
+// Clear the entire cart
+// ==========================
 export const clearCart = async (req, res) => {
   try {
     const cart = await getOrCreateCart(req.user._id);
+
+    // Decrease cartCount for every product currently in the cart
+    for (const item of cart.items) {
+      const product = await Product.findById(item.product);
+
+      if (product) {
+        product.cartCount = Math.max(product.cartCount - 1, 0);
+        await product.save();
+      }
+    }
+
+    // Empty the cart
     cart.items = [];
+
     await cart.save();
 
-    res.status(200).json({ success: true, cart });
+    res.status(200).json({
+      success: true,
+      cart,
+    });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
   }
 };
+    

@@ -56,9 +56,12 @@ export const addItemToWishlist = async (req, res) => {
     );
 
     if (!alreadyExists) {
-      wishlist.items.push({ product: productId });
-      await wishlist.save();
-    }
+  wishlist.items.push({ product: productId });
+  await wishlist.save();
+
+  product.wishlistCount += 1;
+  await product.save();
+}
 
     const wishlistWithProducts = await populatedWishlist(req.user._id);
     res.status(200).json({ success: true, wishlist: wishlistWithProducts });
@@ -76,21 +79,51 @@ export const removeWishlistItem = async (req, res) => {
     const { productId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ success: false, message: "Invalid productId" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid productId",
+      });
     }
 
     const wishlist = await getOrCreateWishlist(req.user._id);
+
+    const existed = wishlist.items.some(
+      (item) => item.product.toString() === productId
+    );
+
     wishlist.items = wishlist.items.filter(
       (item) => item.product.toString() !== productId
     );
 
     await wishlist.save();
+
+    if (existed) {
+      const product = await Product.findById(productId);
+
+if (product) {
+  product.wishlistCount = Math.max(
+    product.wishlistCount - 1,
+    0
+  );
+
+  await product.save();
+}
+    }
+
     const wishlistWithProducts = await populatedWishlist(req.user._id);
 
-    res.status(200).json({ success: true, wishlist: wishlistWithProducts });
+    res.status(200).json({
+      success: true,
+      wishlist: wishlistWithProducts,
+    });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
   }
 };
 

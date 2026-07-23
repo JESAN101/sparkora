@@ -74,14 +74,39 @@ export const createProduct = async (req, res) => {
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.find()
-      .populate("seller", "fullName email")
-      .sort({ createdAt: -1 });
+  .populate("seller", "fullName email");
+
+const scoredProducts = products.map((product) => {
+  const days =
+    (Date.now() - new Date(product.createdAt)) /
+    (1000 * 60 * 60 * 24);
+
+  const recencyBonus = Math.max(30 - days, 0);
+
+  const trendScore =
+    product.views * 0.2 +
+    product.wishlistCount * 3 +
+    product.cartCount * 4 +
+    product.purchaseCount * 8 +
+    product.rating * 10 +
+    product.reviews * 5 +
+    recencyBonus;
+
+  return {
+    ...product.toObject(),
+    trendScore,
+  };
+});
+
+scoredProducts.sort(
+  (a, b) => b.trendScore - a.trendScore
+);
 
     res.status(200).json({
-      success: true,
-      count: products.length,
-      products,
-    });
+  success: true,
+  count: scoredProducts.length,
+  products: scoredProducts,
+});
 
   } catch (error) {
     console.error(error);
@@ -332,3 +357,91 @@ export const updateStock = async (req, res) => {
     });
   }
 };
+
+// ==========================
+// Increment Product Views
+// ==========================
+export const incrementProductViews = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    product.views += 1;
+
+    await product.save();
+
+    res.status(200).json({
+      success: true,
+      views: product.views,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+// ==========================
+// Get Trending Products
+// ==========================
+export const getTrendingProducts = async (req, res) => {
+  try {
+    const products = await Product.find();
+
+    const trendingProducts = products
+      .map((product) => {
+        const days =
+          (Date.now() - new Date(product.createdAt)) /
+          (1000 * 60 * 60 * 24);
+
+        const recencyBonus = Math.max(30 - days, 0);
+
+        const trendScore =
+          (product.views || 0) * 0.2 +
+          (product.wishlistCount || 0) * 3 +
+          (product.cartCount || 0) * 4 +
+          (product.purchaseCount || 0) * 8 +
+          (product.rating || 0) * 10 +
+          (product.reviews || 0) * 5 +
+          recencyBonus;
+
+        return {
+          ...product.toObject(),
+          trendScore,
+        };
+      })
+      .sort((a, b) => b.trendScore - a.trendScore)
+      .slice(0, 8);
+
+    res.json({
+      success: true,
+      products: trendingProducts,
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+

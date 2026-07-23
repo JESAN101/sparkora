@@ -6,6 +6,8 @@ import {
   FaBolt,
   FaGem,
   FaCertificate,
+  FaEye,
+  FaBoxOpen,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -100,6 +102,68 @@ const ProductInfo = ({ product }) => {
           </span>
         </div>
       </div>
+
+      {/* Popularity Statistics */}
+
+<div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+
+  <div className="card-luxury p-5 text-center">
+
+    <FaEye className="mx-auto text-rose text-2xl mb-3" />
+
+    <p className="text-3xl font-bold text-charcoal">
+      {product.views || 0}
+    </p>
+
+    <p className="text-xs uppercase tracking-[2px] text-taupe mt-1">
+      Views
+    </p>
+
+  </div>
+
+  <div className="card-luxury p-5 text-center">
+
+    <FaHeart className="mx-auto text-red-500 text-2xl mb-3" />
+
+    <p className="text-3xl font-bold text-charcoal">
+      {product.wishlistCount || 0}
+    </p>
+
+    <p className="text-xs uppercase tracking-[2px] text-taupe mt-1">
+      Wishlists
+    </p>
+
+  </div>
+
+  <div className="card-luxury p-5 text-center">
+
+    <FaShoppingCart className="mx-auto text-gold text-2xl mb-3" />
+
+    <p className="text-3xl font-bold text-charcoal">
+      {product.cartCount || 0}
+    </p>
+
+    <p className="text-xs uppercase tracking-[2px] text-taupe mt-1">
+      In Cart
+    </p>
+
+  </div>
+
+  <div className="card-luxury p-5 text-center">
+
+    <FaBoxOpen className="mx-auto text-green-600 text-2xl mb-3" />
+
+    <p className="text-3xl font-bold text-charcoal">
+      {product.purchaseCount || 0}
+    </p>
+
+    <p className="text-xs uppercase tracking-[2px] text-taupe mt-1">
+      Sold
+    </p>
+
+  </div>
+
+</div>
 
       {/* Description */}
       <p className="text-taupe leading-8 text-lg">

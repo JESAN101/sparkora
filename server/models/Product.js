@@ -45,6 +45,25 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    views: {
+  type: Number,
+  default: 0,
+},
+
+wishlistCount: {
+  type: Number,
+  default: 0,
+},
+
+cartCount: {
+  type: Number,
+  default: 0,
+},
+
+purchaseCount: {
+  type: Number,
+  default: 0,
+},
     featured: {
       type: Boolean,
       default: false,
