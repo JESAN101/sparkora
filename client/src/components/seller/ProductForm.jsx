@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
-const CATEGORIES = ["Rings", "Necklaces", "Earrings", "Bracelets"];
+import { getCategories } from "../../services/categoryService";
 
 const inputClass =
   "w-full border border-line rounded-xl p-3.5 text-sm bg-ivory focus:outline-none focus:border-rose transition-colors";
@@ -20,6 +19,28 @@ const ProductForm = ({
   } = useForm({ defaultValues });
 
   const [previews, setPreviews] = useState([]);
+  const [categories, setCategories] = useState([]);
+const [loadingCategories, setLoadingCategories] = useState(true);
+
+useEffect(() => {
+  fetchCategories();
+}, []);
+
+const fetchCategories = async () => {
+  try {
+    const data = await getCategories();
+
+    const activeCategories = data.categories
+      .filter((cat) => cat.isActive)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    setCategories(activeCategories);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoadingCategories(false);
+  }
+};
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files || []);
@@ -84,11 +105,24 @@ const ProductForm = ({
               <option value="" disabled>
                 Select Category
               </option>
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
+              {loadingCategories ? (
+    <option disabled>
+        Loading...
+    </option>
+) : categories.length === 0 ? (
+    <option disabled>
+        No Categories Available
+    </option>
+) : (
+    categories.map((category) => (
+        <option
+            key={category._id}
+            value={category.name}
+        >
+            {category.name}
+        </option>
+    ))
+)}
             </select>
             {errors.category && (
               <p className="text-xs text-burgundy mt-1.5">{errors.category.message}</p>

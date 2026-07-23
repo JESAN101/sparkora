@@ -4,7 +4,8 @@ import {
   FaUsers,
   FaBoxOpen,
   FaShoppingCart,
-   FaStore,
+  FaStore,
+  FaTags,
 } from "react-icons/fa";
 
 const AdminSidebar = () => {
@@ -24,6 +25,11 @@ const AdminSidebar = () => {
       icon: <FaBoxOpen />,
       path: "/admin/products",
     },
+    {
+  name: "Categories",
+  icon: <FaTags />,
+  path: "/admin/categories",
+},
     {
       name: "Orders",
       icon: <FaShoppingCart />,

@@ -43,6 +43,7 @@ import Products from "../pages/admin/Products";
 import Orders from "../pages/admin/Orders";
 import AdminEditProduct from "../pages/admin/EditProduct";
 import SellerApplications from "../pages/admin/SellerApplications";
+import Categories from "../pages/admin/Categories";
 
 const AppRoutes = () => {
   return (
@@ -188,6 +189,7 @@ const AppRoutes = () => {
           <Route path="products" element={<Products />} />
           <Route path="products/:id/edit" element={<AdminEditProduct />} />
           <Route path="orders" element={<Orders />} />
+          <Route path="categories" element={<Categories />} />
           <Route
   path="seller-applications"
   element={<SellerApplications />}

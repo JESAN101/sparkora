@@ -78,3 +78,54 @@ export const deleteAdminOrder = async (id) => {
   const { data } = await API.delete(`/admin/orders/${id}`);
   return data;
 };
+
+// ===========================
+// Categories
+// ===========================
+
+// Get all categories
+export const getCategories = async () => {
+  const { data } = await API.get("/categories");
+  return data;
+};
+
+// Create category
+export const createCategory = async (formData) => {
+  const { data } = await API.post(
+    "/categories",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return data;
+};
+
+
+// Update category
+export const updateCategory = async (id, formData) => {
+  const { data } = await API.put(
+    `/categories/${id}`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return data;
+};
+
+// Delete category
+export const deleteCategory = async (id) => {
+  const { data } = await API.delete(
+    `/categories/${id}`
+  );
+
+  return data;
+};
+

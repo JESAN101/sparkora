@@ -8,6 +8,7 @@ import SearchBar from "../components/shop/SearchBar";
 import CategoryFilter from "../components/shop/CategoryFilter";
 import SortDropdown from "../components/shop/SortDropdown";
 import ProductGrid from "../components/shop/ProductGrid";
+import { getCategories } from "../api/adminApi";
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
@@ -20,6 +21,7 @@ const Shop = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState(initialCategory);
   const [sort, setSort] = useState("Default");
+  const [categories, setCategories] = useState([]);
 
    useEffect(() => {
     setSearch(searchParams.get("search") || "");
@@ -41,6 +43,22 @@ const Shop = () => {
     };
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+
+      setCategories(
+        data.categories.filter((cat) => cat.isActive)
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchCategories();
+}, []);
 
   const filteredProducts = useMemo(() => {
     let filtered = [...products];
@@ -95,7 +113,11 @@ const Shop = () => {
         <div className="grid lg:grid-cols-4 gap-8 lg:gap-10">
           <div>
             <SearchBar search={search} setSearch={setSearch} />
-            <CategoryFilter category={category} setCategory={setCategory} />
+            <CategoryFilter
+    category={category}
+    setCategory={setCategory}
+    categories={categories}
+/>
             <SortDropdown sort={sort} setSort={setSort} />
           </div>
 

@@ -1,47 +1,42 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  FaShoppingBag,
-  FaRegHeart,
-  FaRegUser,
-  FaSearch,
-  FaBars,
-  FaTimes,
-  FaChevronDown,
-  FaSignOutAlt,
-  FaBoxOpen,
-  FaStore,
-  FaMoon,
-  FaSun,
-} from "react-icons/fa";
+  FiShoppingBag,
+  FiHeart,
+  FiUser,
+  FiSearch,
+  FiMenu,
+  FiX,
+  FiChevronDown,
+  FiLogOut,
+  FiPackage,
+  FiBriefcase,
+  FiMoon,
+  FiSun,
+} from "react-icons/fi";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useAuth } from "../../context/AuthContext";
 import BrandMark from "./BrandMark";
-
-const searchSuggestions = [
-  { label: "New Arrivals", to: "/shop?category=new-arrivals" },
-  { label: "Rings", to: "/shop?category=Rings" },
-  { label: "Necklaces", to: "/shop?category=Necklaces" },
-  { label: "Earrings", to: "/shop?category=Earrings" },
-  { label: "Bracelets", to: "/shop?category=Bracelets" },
-];
+import { getCategories } from "../../api/adminApi";
 
 const Navbar = () => {
   const { cartItems } = useCart();
   const { wishlist } = useWishlist();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [categories, setCategories] = useState([]);
   const [darkMode, setDarkMode] = useState(() => {
-  return localStorage.getItem("theme") === "dark";
-});
+    return localStorage.getItem("theme") === "dark";
+  });
 
   const userMenuRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -50,11 +45,27 @@ const Navbar = () => {
   const cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
   const wishlistCount = wishlist.length;
 
-  const navLink =
-    "relative text-[15px] tracking-wide text-charcoal/80 hover:text-rose-dark transition-colors after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[1.5px] after:w-0 after:bg-rose after:transition-all hover:after:w-full";
+  // --- Active-route detection (drives the persistent underline) ---
+  const params = new URLSearchParams(location.search);
+  const isNewArrivalsActive =
+    location.pathname === "/shop" && params.get("sort") === "Latest";
+  const isShopActive = location.pathname.startsWith("/shop") && !isNewArrivalsActive;
+  const isHomeActive = location.pathname === "/";
 
-  const mobileNavLink =
-    "flex items-center gap-3 py-3 text-[16px] tracking-wide text-charcoal/80 hover:text-rose-dark transition-colors border-b border-line/60";
+  const navLinkClass = (active) =>
+    `relative pb-1 text-[15px] tracking-wide transition-colors after:content-[''] after:absolute after:-bottom-0.5 after:left-0 after:h-[1.5px] after:bg-gold after:transition-all after:duration-300 ${
+      active
+        ? "text-charcoal after:w-full"
+        : "text-charcoal/75 hover:text-rose-dark after:w-0 hover:after:w-full"
+    }`;
+
+  const mobileNavLink = (active) =>
+    `flex items-center gap-3 py-3 text-[16px] tracking-wide transition-colors border-b border-line/60 ${
+      active ? "text-rose-dark font-medium" : "text-charcoal/80 hover:text-rose-dark"
+    }`;
+
+  const iconBtn =
+    "flex items-center justify-center w-9 h-9 rounded-full text-charcoal/75 hover:text-rose-dark hover:bg-charcoal/[0.05] transition-colors";
 
   // Sticky-on-scroll: toggle a compact/shadowed state once the user scrolls
   useEffect(() => {
@@ -86,8 +97,8 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [searchOpen]);
 
-  // Search shortcut: Cmd/Ctrl+K or "/" opens search, Esc closes it — lets
-  // people jump to search from anywhere on the page without the mouse
+  // Search shortcut: Cmd/Ctrl+K or "/" opens search, Esc closes it.
+  // Still fully functional — it's just no longer advertised as a badge in the navbar.
   useEffect(() => {
     const handleKeyDown = (e) => {
       const isTypingField =
@@ -123,14 +134,32 @@ const Navbar = () => {
   }, [mobileOpen]);
 
   useEffect(() => {
-  if (darkMode) {
-    document.documentElement.classList.add("dark");
-    localStorage.setItem("theme", "dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-    localStorage.setItem("theme", "light");
-  }
-}, [darkMode]);
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+
+        const activeCategories = data.categories
+          .filter((cat) => cat.isActive)
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        setCategories(activeCategories);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -179,59 +208,52 @@ const Navbar = () => {
             Sparkora
           </Link>
 
-          <div className="hidden md:flex items-center gap-9">
-            <Link to="/" className={navLink}>Home</Link>
-            <Link to="/shop" className={navLink}>Shop</Link>
-            <Link to="/shop?sort=Latest" className={navLink}>New Arrivals</Link>
+          <div className="hidden md:flex items-center gap-10">
+            <Link to="/" className={navLinkClass(isHomeActive)}>Home</Link>
+            <Link to="/shop" className={navLinkClass(isShopActive)}>Shop</Link>
+            <Link to="/shop?sort=Latest" className={navLinkClass(isNewArrivalsActive)}>New Arrivals</Link>
           </div>
 
-          <div className="flex items-center gap-5 text-charcoal">
-
+          <div className="flex items-center gap-1.5">
+            {/* Theme toggle */}
             <button
-  onClick={() => setDarkMode(!darkMode)}
-  className="text-charcoal hover:text-rose-dark transition-colors"
-  aria-label="Toggle Theme"
->
-  {darkMode ? <FaSun size={18} /> : <FaMoon size={18} />}
-</button>
+              onClick={() => setDarkMode(!darkMode)}
+              className={iconBtn}
+              aria-label="Toggle theme"
+            >
+              {darkMode ? <FiSun size={17} /> : <FiMoon size={17} />}
+            </button>
+
             {/* Search trigger */}
             <motion.button
-              whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.94 }}
               onClick={() => setSearchOpen((o) => !o)}
-              className={`hidden sm:flex items-center gap-2 transition-colors ${
-                searchOpen ? "text-rose-dark" : "text-charcoal/70 hover:text-rose-dark"
-              }`}
+              className={`${iconBtn} hidden sm:flex ${searchOpen ? "text-rose-dark bg-charcoal/[0.05]" : ""}`}
               aria-label="Search"
               aria-expanded={searchOpen}
             >
-              <FaSearch size={18} />
-              <span
-                title="Press Cmd/Ctrl + K to search from anywhere"
-                className="hidden lg:flex items-center gap-1 text-xs text-charcoal/40 border border-line rounded px-1.5 py-0.5"
-              >
-                <span>⌘</span>K
-              </span>
+              <FiSearch size={18} />
             </motion.button>
+
+            <div className="hidden sm:block w-px h-5 bg-line mx-1.5" />
 
             {/* User dropdown */}
             <div className="relative hidden sm:block" ref={userMenuRef}>
               {user ? (
                 <>
                   <motion.button
-                    whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => setUserMenuOpen((o) => !o)}
-                    className="flex items-center gap-2 hover:text-rose-dark transition-colors"
+                    className="flex items-center gap-1.5 px-1.5 h-9 rounded-full text-charcoal/75 hover:text-rose-dark hover:bg-charcoal/[0.05] transition-colors"
                     aria-label="Account menu"
                     aria-expanded={userMenuOpen}
                   >
-                    <FaRegUser size={19} />
+                    <FiUser size={18} />
                     <span className="text-sm font-medium hidden lg:block">
                       Hi, {user.firstName?.split(" ")[0]}
                     </span>
-                    <FaChevronDown
-                      size={11}
+                    <FiChevronDown
+                      size={13}
                       className={`transition-transform ${userMenuOpen ? "rotate-180" : ""}`}
                     />
                   </motion.button>
@@ -243,55 +265,51 @@ const Navbar = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 mt-3 w-48 bg-ivory border border-line rounded-lg shadow-lg py-2"
+                        className="absolute right-0 mt-3 w-52 bg-ivory border border-line rounded-lg shadow-lg py-2"
                       >
                         <Link
                           to="/profile"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
                         >
-                          <FaRegUser size={13} /> My Profile
+                          <FiUser size={14} /> My Profile
                         </Link>
                         <Link
                           to="/orders"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
                         >
-                          <FaBoxOpen size={13} /> My Orders
+                          <FiPackage size={14} /> My Orders
                         </Link>
                         <Link
                           to="/become-seller"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
                         >
-                          <FaStore size={13} /> Be a Seller
+                          <FiBriefcase size={14} /> Be a Seller
                         </Link>
                         <div className="my-1 border-t border-line" />
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
+                          className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal/80 hover:bg-rose/10 hover:text-rose-dark transition-colors"
                         >
-                          <FaSignOutAlt size={13} /> Logout
+                          <FiLogOut size={14} /> Logout
                         </button>
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </>
               ) : (
-                <Link
-                  to="/login"
-                  className="flex items-center gap-2 hover:text-rose-dark transition-colors"
-                  aria-label="Login"
-                >
-                  <FaRegUser size={19} />
+                <Link to="/login" className={iconBtn} aria-label="Login">
+                  <FiUser size={18} />
                 </Link>
               )}
             </div>
 
             {/* Wishlist */}
-            <Link to="/wishlist" className="relative hover:text-rose-dark transition-colors" aria-label="Wishlist">
-              <motion.span whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.94 }} className="block">
-                <FaRegHeart size={24} />
+            <Link to="/wishlist" className={`relative ${iconBtn}`} aria-label="Wishlist">
+              <motion.span whileTap={{ scale: 0.94 }} className="block">
+                <FiHeart size={19} />
               </motion.span>
               <AnimatePresence>
                 {wishlistCount > 0 && (
@@ -301,7 +319,7 @@ const Navbar = () => {
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                    className="absolute -top-2 -right-2 bg-burgundy text-ivory text-[11px] font-semibold min-w-[19px] h-[19px] px-1 rounded-full flex items-center justify-center"
+                    className="absolute top-0.5 right-0.5 bg-burgundy text-ivory text-[10px] font-semibold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center"
                   >
                     {wishlistCount > 99 ? "99+" : wishlistCount}
                   </motion.span>
@@ -310,9 +328,9 @@ const Navbar = () => {
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="relative hover:text-rose-dark transition-colors" aria-label="Cart">
-              <motion.span whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.94 }} className="block">
-                <FaShoppingBag size={24} />
+            <Link to="/cart" className={`relative ${iconBtn}`} aria-label="Cart">
+              <motion.span whileTap={{ scale: 0.94 }} className="block">
+                <FiShoppingBag size={19} />
               </motion.span>
               <AnimatePresence>
                 {cartCount > 0 && (
@@ -322,7 +340,7 @@ const Navbar = () => {
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                    className="absolute -top-2 -right-2 bg-rose text-ivory text-[11px] font-semibold min-w-[19px] h-[19px] px-1 rounded-full flex items-center justify-center"
+                    className="absolute top-0.5 right-0.5 bg-rose text-ivory text-[10px] font-semibold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center"
                   >
                     {cartCount > 99 ? "99+" : cartCount}
                   </motion.span>
@@ -333,11 +351,11 @@ const Navbar = () => {
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileOpen((o) => !o)}
-              className="md:hidden text-charcoal hover:text-rose-dark transition-colors"
+              className={`${iconBtn} md:hidden`}
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
             >
-              {mobileOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+              {mobileOpen ? <FiX size={20} /> : <FiMenu size={20} />}
             </button>
           </div>
         </div>
@@ -353,18 +371,18 @@ const Navbar = () => {
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="overflow-hidden bg-ivory border-b border-line shadow-lg"
             >
-              <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8">
-                <form onSubmit={handleSearchSubmit} className="flex items-center gap-3">
-                  <FaSearch className="text-charcoal/40 shrink-0" size={20} />
+              <div className="max-w-7xl mx-auto px-6 lg:px-10 py-9">
+                <form onSubmit={handleSearchSubmit} className="relative flex items-center gap-4">
+                  <FiSearch className="text-charcoal/40 shrink-0" size={20} />
                   <input
                     ref={searchInputRef}
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search rings, necklaces, earrings..."
-                    className="flex-1 bg-transparent outline-none text-xl font-display text-charcoal placeholder:text-charcoal/30"
+                    className="flex-1 bg-transparent outline-none text-xl font-display text-charcoal placeholder:text-charcoal/30 pb-2 border-b border-line focus:border-gold transition-colors"
                   />
-                  <kbd className="hidden sm:block text-xs text-charcoal/40 border border-line rounded px-1.5 py-0.5 shrink-0">
+                  <kbd className="hidden sm:block text-[11px] text-charcoal/40 border border-line rounded px-1.5 py-0.5 shrink-0">
                     Esc
                   </kbd>
                   <button
@@ -373,22 +391,32 @@ const Navbar = () => {
                     aria-label="Close search"
                     className="text-charcoal/40 hover:text-rose-dark transition-colors shrink-0"
                   >
-                    <FaTimes size={18} />
+                    <FiX size={18} />
                   </button>
                 </form>
 
-                <div className="flex items-center gap-3 mt-5 flex-wrap">
+                <div className="flex items-center gap-3 mt-6 flex-wrap">
                   <span className="text-xs uppercase tracking-widest text-taupe">Popular:</span>
-                  {searchSuggestions.map((item) => (
+                  <>
                     <Link
-                      key={item.label}
-                      to={item.to}
+                      to="/shop?sort=Latest"
                       onClick={() => setSearchOpen(false)}
-                      className="text-sm text-charcoal/70 border border-line rounded-full px-3.5 py-1.5 hover:border-rose hover:text-rose-dark transition-colors"
+                      className="text-sm text-charcoal/70 border border-line rounded-full px-3.5 py-1.5 hover:border-gold hover:text-rose-dark transition-colors"
                     >
-                      {item.label}
+                      New Arrivals
                     </Link>
-                  ))}
+
+                    {categories.map((cat) => (
+                      <Link
+                        key={cat._id}
+                        to={`/shop?category=${encodeURIComponent(cat.name)}`}
+                        onClick={() => setSearchOpen(false)}
+                        className="text-sm text-charcoal/70 border border-line rounded-full px-3.5 py-1.5 hover:border-gold hover:text-rose-dark transition-colors"
+                      >
+                        {cat.name}
+                      </Link>
+                    ))}
+                  </>
                 </div>
               </div>
             </motion.div>
@@ -420,36 +448,36 @@ const Navbar = () => {
             </motion.p>
           )}
           <motion.div variants={mobileItemVariants}>
-            <Link to="/" onClick={() => setMobileOpen(false)} className={mobileNavLink}>Home</Link>
+            <Link to="/" onClick={() => setMobileOpen(false)} className={mobileNavLink(isHomeActive)}>Home</Link>
           </motion.div>
           <motion.div variants={mobileItemVariants}>
-            <Link to="/shop" onClick={() => setMobileOpen(false)} className={mobileNavLink}>Shop</Link>
+            <Link to="/shop" onClick={() => setMobileOpen(false)} className={mobileNavLink(isShopActive)}>Shop</Link>
           </motion.div>
           <motion.div variants={mobileItemVariants}>
-            <Link to="/shop?sort=Latest" onClick={() => setMobileOpen(false)} className={mobileNavLink}>New Arrivals</Link>
+            <Link to="/shop?sort=Latest" onClick={() => setMobileOpen(false)} className={mobileNavLink(isNewArrivalsActive)}>New Arrivals</Link>
           </motion.div>
           <motion.div variants={mobileItemVariants}>
-            <Link to="/wishlist" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
-              <FaRegHeart size={16} /> Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
+            <Link to="/wishlist" onClick={() => setMobileOpen(false)} className={mobileNavLink(false)}>
+              <FiHeart size={16} /> Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
             </Link>
           </motion.div>
           <motion.div variants={mobileItemVariants}>
-            <Link to="/cart" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
-              <FaShoppingBag size={16} /> Cart {cartCount > 0 && `(${cartCount})`}
+            <Link to="/cart" onClick={() => setMobileOpen(false)} className={mobileNavLink(false)}>
+              <FiShoppingBag size={16} /> Cart {cartCount > 0 && `(${cartCount})`}
             </Link>
           </motion.div>
 
           <motion.div variants={mobileItemVariants} className="mt-6">
             {user ? (
               <>
-                <Link to="/profile" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
-                  <FaRegUser size={14} /> My Profile
+                <Link to="/profile" onClick={() => setMobileOpen(false)} className={mobileNavLink(false)}>
+                  <FiUser size={14} /> My Profile
                 </Link>
-                <Link to="/orders" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
-                  <FaBoxOpen size={14} /> My Orders
+                <Link to="/orders" onClick={() => setMobileOpen(false)} className={mobileNavLink(false)}>
+                  <FiPackage size={14} /> My Orders
                 </Link>
-                <Link to="/seller" onClick={() => setMobileOpen(false)} className={mobileNavLink}>
-                  <FaStore size={14} /> Seller
+                <Link to="/seller" onClick={() => setMobileOpen(false)} className={mobileNavLink(false)}>
+                  <FiBriefcase size={14} /> Seller
                 </Link>
                 <button
                   onClick={() => {
@@ -458,7 +486,7 @@ const Navbar = () => {
                   }}
                   className="mt-3 flex items-center gap-2 text-[15px] text-rose-dark font-medium"
                 >
-                  <FaSignOutAlt size={14} /> Logout
+                  <FiLogOut size={14} /> Logout
                 </button>
               </>
             ) : (
@@ -467,7 +495,7 @@ const Navbar = () => {
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center gap-2 text-[15px] text-rose-dark font-medium"
               >
-                <FaRegUser size={14} /> Login
+                <FiUser size={14} /> Login
               </Link>
             )}
           </motion.div>
